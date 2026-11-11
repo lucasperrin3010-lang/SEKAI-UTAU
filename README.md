@@ -6,6 +6,9 @@ translucides, clavier jouable en bas de fenêtre, couleurs personnalisables,
 enregistrement vidéo avec le son interne, et import de projets MIDI / UST / USTX /
 VSQ / VSQX / SVP / CCS / MusicXML / MXL.
 
+Tous les noms du programme sont en SEKAI UTAU : exécutable `SekaiUtau`, assembly
+`SekaiUtau`, bundle macOS `SEKAI UTAU.app`, dossiers de projet `SekaiUtau*`.
+
 ## Téléchargement
 
 Les paquets prêts à l'emploi sont dans les
@@ -22,16 +25,16 @@ et les empreintes SHA-256 sont fournies dans `SHA256SUMS.txt`.
 
 ## Installation en bref
 
-**Windows** — dézipper, ouvrir le dossier `SEKAI-UTAU`, lancer `OpenUtau.exe`
+**Windows** — dézipper, ouvrir le dossier `SEKAI-UTAU`, lancer `SekaiUtau.exe`
 (avertissement SmartScreen : *Informations complémentaires* → *Exécuter quand même*).
 
 **Linux** — `tar -xzf SEKAI-UTAU-linux-x64.tar.gz`, puis
-`chmod +x SEKAI-UTAU/OpenUtau` et `./SEKAI-UTAU/OpenUtau`.
+`chmod +x SEKAI-UTAU/SekaiUtau` et `./SEKAI-UTAU/SekaiUtau`.
 
 **macOS** — dézipper, puis dans un Terminal :
 
 ```
-chmod +x "SEKAI UTAU.app/Contents/MacOS/OpenUtau"
+chmod +x "SEKAI UTAU.app/Contents/MacOS/SekaiUtau"
 xattr -dr com.apple.quarantine "SEKAI UTAU.app"
 codesign --force --deep -s - "SEKAI UTAU.app"
 open "SEKAI UTAU.app"
@@ -52,7 +55,7 @@ chiffrés `.vvd`/`.vvb`) ne sont pas compatibles.
 Le projet se compile avec le SDK .NET 10 :
 
 ```
-dotnet publish OpenUtau -c Release -r win-x64 --self-contained true -o bin/win-x64
+dotnet publish SekaiUtau -c Release -r win-x64 --self-contained true -o bin/win-x64
 ```
 
 Autres cibles : `linux-x64`, `osx-arm64`. Sur un hôte non Windows, ajouter
