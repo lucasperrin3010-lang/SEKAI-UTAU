@@ -16,9 +16,9 @@ Les paquets prêts à l'emploi sont dans les
 
 | Système | Fichier |
 |---|---|
-| Windows 64 bits | [SEKAI-UTAU-win-x64.zip](https://github.com/lucasperrin3010-lang/SEKAI-UTAU/releases/download/v1.0.1/SEKAI-UTAU-win-x64.zip) |
-| Linux x86_64 | [SEKAI-UTAU-linux-x64.tar.gz](https://github.com/lucasperrin3010-lang/SEKAI-UTAU/releases/download/v1.0.1/SEKAI-UTAU-linux-x64.tar.gz) |
-| macOS Apple Silicon | [SEKAI-UTAU-osx-arm64.zip](https://github.com/lucasperrin3010-lang/SEKAI-UTAU/releases/download/v1.0.1/SEKAI-UTAU-osx-arm64.zip) |
+| Windows 64 bits | [SEKAI-UTAU-win-x64.zip](https://github.com/lucasperrin3010-lang/SEKAI-UTAU/releases/download/v1.0.2/SEKAI-UTAU-win-x64.zip) |
+| Linux x86_64 | [SEKAI-UTAU-linux-x64.tar.gz](https://github.com/lucasperrin3010-lang/SEKAI-UTAU/releases/download/v1.0.2/SEKAI-UTAU-linux-x64.tar.gz) |
+| macOS Apple Silicon | [SEKAI-UTAU-osx-arm64.zip](https://github.com/lucasperrin3010-lang/SEKAI-UTAU/releases/download/v1.0.2/SEKAI-UTAU-osx-arm64.zip) |
 
 Chaque paquet contient une notice d'installation (`A-LIRE-AVANT-INSTALLATION.txt`)
 et les empreintes SHA-256 sont fournies dans `SHA256SUMS.txt`.
