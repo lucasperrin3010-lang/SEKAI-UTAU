@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SEKAI UTAU 1.0.13 — éditeur de chant</title>
+<meta name="description" content="SEKAI UTAU : éditeur de chant pour Windows, Linux et macOS. Piano roll, banques UTAU et DiffSinger, export WAV/MIDI, interface française, mode duo par fichier.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <a class="logo" href="#haut">SEKAI&nbsp;<span>UTAU</span></a>
+  <nav class="links" id="links">
+    <a href="#app">L'application</a>
+    <a href="#banques">Banques</a>
+    <a href="#duo">Duo</a>
+    <a href="#versions">Versions</a>
+    <a href="#telecharger">Télécharger</a>
+  </nav>
+  <a class="dl" href="#telecharger">v1.0.13</a>
+  <button class="menu" id="menu" aria-label="Ouvrir le menu">≡</button>
+</header>
+
+<main id="haut">
+
+  <section class="intro">
+    <div class="intro-text">
+      <p class="kicker">Éditeur de chant · Windows, Linux, macOS</p>
+      <h1>Un éditeur de chant qui parle français.</h1>
+      <p class="sub">
+        SEKAI UTAU reprend OpenUtau (MIT) et le pousse côté français : les 1056 chaînes
+        d'interface sont traduites, les messages d'erreur des banques aussi. On écrit les
+        notes, on règle les phonèmes, on rend en WAV.
+      </p>
+      <p class="download-line">
+        <a class="button" href="#telecharger">Télécharger 1.0.13</a>
+        <a class="textlink" href="#versions">Voir ce qui a changé</a>
+      </p>
+    </div>
+    <figure class="shot">
+      <img src="img/editor.png" alt="Piste de chant, piano roll et expressions dans SEKAI UTAU">
+      <figcaption>Deux pistes, une partie de notes, les courbes d'expression à droite.</figcaption>
+    </figure>
+  </section>
+
+  <ul class="specs">
+    <li><span>Rendu</span> WAV par piste ou mixage</li>
+    <li><span>Projets</span> USTX, UST, MIDI, VSQ, SVP, CCS, MusicXML</li>
+    <li><span>Voix</span> UTAU, DiffSinger, Enunu</li>
+    <li><span>Licence</span> MIT, dérivé d'OpenUtau</li>
+  </ul>
+
+  <section id="app" class="block">
+    <h2>Ce qu'on fait dans l'application</h2>
+    <div class="cols">
+      <div class="col">
+        <h3>Écrire</h3>
+        <p>
+          Piano roll, paroles note par note, vibrato et portamento réglables, phonèmes
+          modifiables un par un. Les expressions (DYN, PITD, CLR, VEL, ATK, DEC, GEN, BRE)
+          se dessinent à la souris, avec aperçu pendant la lecture.
+        </p>
+        <h3>Faire chanter</h3>
+        <p>
+          UTAU classique, DiffSinger et Enunu. Le phonémiseur se choisit par piste ; quand la
+          banque ne gère pas la langue demandée, l'application retombe sur le phonémiseur
+          japonais au lieu d'échouer silencieusement.
+        </p>
+      </div>
+      <div class="col">
+        <h3>Rendre</h3>
+        <p>
+          WAV par piste, mixage complet, export UST et MIDI, scripts DiffSinger pour les
+          curieux. Cache de rendu et lecture en boucle pour ne pas attendre entre deux essais.
+        </p>
+        <h3>Reprendre un projet</h3>
+        <p>
+          L'import accepte USTX, UST, MIDI, VSQ/VSQX, SVP, CCS, MusicXML et MXL. Les parties
+          audio suivent, et les anciens fichiers gardent leurs réglages de piste.
+        </p>
+      </div>
+    </div>
+
+    <figure class="shot wide">
+      <img src="img/home.png" alt="Écran d'accueil de SEKAI UTAU avec les projets récents">
+      <figcaption>Accueil : projets récents avec leur dossier, modèles, aucune fenêtre vide.</figcaption>
+    </figure>
+  </section>
+
+  <section id="banques" class="block">
+    <h2>Banques de voix : ce qui marche, ce qui ne marchera pas</h2>
+    <p class="lede">
+      Trois familles se chargent directement. Deux familles du commerce sont fermées — autant
+      le dire sur le site plutôt que de laisser l'utilisateur chercher pourquoi.
+    </p>
+
+    <table class="tbl">
+      <thead>
+        <tr><th>Banque</th><th>État</th><th>Détail</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>UTAU</td>
+          <td class="ok">Chargée</td>
+          <td>Dossier + <code>oto.ini</code> et <code>character.txt</code>. Un dossier posé dans <code>Singers</code> apparaît au redémarrage.</td>
+        </tr>
+        <tr>
+          <td>DiffSinger</td>
+          <td class="ok">Chargée</td>
+          <td>Dictionnaires <code>dsdict-*.yaml</code> multilingues, phonémiseur propre à la banque, repli japonais si besoin.</td>
+        </tr>
+        <tr>
+          <td>Enunu</td>
+          <td class="ok">Chargée</td>
+          <td>Modèles ONNX et tables de phonèmes, comme dans OpenUtau.</td>
+        </tr>
+        <tr>
+          <td>VOCALOID</td>
+          <td class="warn">Détectée, non lisible</td>
+          <td>Données <code>.ddb</code>, <code>.vvd</code>, <code>.vvb</code> chiffrées par l'éditeur. L'app le signale avec le nom du dossier.</td>
+        </tr>
+        <tr>
+          <td>CeVIO AI / VoiSona</td>
+          <td class="warn">Détectée, non lisible</td>
+          <td>Bibliothèques sous licence Techno-Speech, sans format externe. Le message indique la sortie WAV + MIDI.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="duo" class="block duo">
+    <div>
+      <h2>Deux personnes, un morceau <span class="badge">work in progress</span></h2>
+      <p>
+        Un menu <strong>Duo</strong> ouvre des comptes locaux : pseudo, mot de passe facultatif
+        haché en PBKDF2-SHA256, et chaque piste retient son auteur. L'échange se fait par
+        fichier — pas de serveur, rien qui sorte du disque.
+      </p>
+      <ol class="num">
+        <li>Chacun se connecte à son compte.</li>
+        <li><em>Duo &gt; Exporter ma contribution</em> écrit un <code>.ustx</code> avec vos seules pistes.</li>
+        <li><em>Duo &gt; Importer une contribution</em> ajoute celles du partenaire à son projet.</li>
+      </ol>
+      <p class="warnbox">
+        Le temps réel n'existe pas encore : d'où le badge <em>work in progress</em> dans le menu
+        et dans la fenêtre de comptes. Ce qui marche aujourd'hui, c'est l'échange de fichiers.
+      </p>
+    </div>
+    <figure class="shot">
+      <img src="img/duo.png" alt="Fenêtre Comptes duo, avec le bandeau work in progress">
+      <figcaption>Comptes duo : bandeau d'avertissement, comptes locaux, connexion immédiate.</figcaption>
+    </figure>
+  </section>
+
+  <section id="versions" class="block">
+    <h2>Versions récentes</h2>
+    <ol class="log">
+      <li>
+        <p class="v"><strong>1.0.13</strong> <span>12 novembre 2026</span></p>
+        <p>Le menu devient « Duo (work in progress) » et la fenêtre de comptes affiche un avertissement : comptes locaux, contributions par fichier <code>.ustx</code>.</p>
+      </li>
+      <li>
+        <p class="v"><strong>1.0.12</strong> <span>12 novembre 2026</span></p>
+        <p>Comptes locaux, pistes attribuées à leur auteur, export d'une contribution et import chez le partenaire, avec la mention des risques de doublon.</p>
+      </li>
+      <li>
+        <p class="v"><strong>1.0.11</strong> <span>12 novembre 2026</span></p>
+        <p>Détection des bibliothèques CeVIO AI et VoiSona dans le dossier des chanteurs, avec la méthode WAV + MIDI dans le message.</p>
+      </li>
+      <li>
+        <p class="v"><strong>1.0.10</strong> <span>12 novembre 2026</span></p>
+        <p>Traduction complète de l'interface : 333 derniers textes, boutons, dialogues, préférences, gestionnaire de paquets et erreurs de banques.</p>
+      </li>
+    </ol>
+    <p class="more"><a class="textlink" href="https://github.com/lucasperrin3010-lang/SEKAI-UTAU/releases">Toutes les versions sur GitHub</a></p>
+  </section>
+
+  <section id="telecharger" class="block">
+    <h2>Télécharger</h2>
+    <p class="lede">Archives autonomes, rien à compiler. Version 1.0.13.</p>
+    <table class="tbl dl-tbl">
+      <thead><tr><th>Système</th><th>Fichier</th><th>Taille</th><th></th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Windows 64 bits</td>
+          <td><code>SEKAI-UTAU-win-x64.zip</code></td>
+          <td>143 Mo</td>
+          <td><a href="https://github.com/lucasperrin3010-lang/SEKAI-UTAU/releases/download/v1.0.13/SEKAI-UTAU-win-x64.zip">Télécharger</a></td>
+        </tr>
+        <tr>
+          <td>Linux x86_64</td>
+          <td><code>SEKAI-UTAU-linux-x64.tar.gz</code></td>
+          <td>130 Mo</td>
+          <td><a href="https://github.com/lucasperrin3010-lang/SEKAI-UTAU/releases/download/v1.0.13/SEKAI-UTAU-linux-x64.tar.gz">Télécharger</a></td>
+        </tr>
+        <tr>
+          <td>macOS Apple Silicon</td>
+          <td><code>SEKAI-UTAU-osx-arm64.zip</code></td>
+          <td>123 Mo</td>
+          <td><a href="https://github.com/lucasperrin3010-lang/SEKAI-UTAU/releases/download/v1.0.13/SEKAI-UTAU-osx-arm64.zip">Télécharger</a></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <details>
+      <summary>Windows</summary>
+      <p>Dézipper, lancer <code>SekaiUtau.exe</code>. SmartScreen : « Informations complémentaires » puis « Exécuter quand même ».</p>
+    </details>
+    <details>
+      <summary>Linux</summary>
+      <p><code>tar -xzf SEKAI-UTAU-linux-x64.tar.gz</code>, puis <code>chmod +x SEKAI-UTAU/SekaiUtau</code> et lancer le binaire.</p>
+    </details>
+    <details>
+      <summary>macOS</summary>
+      <p>Non signé par Apple : <code>xattr -dr com.apple.quarantine "SEKAI UTAU.app"</code> puis <code>codesign --force --deep -s - "SEKAI UTAU.app"</code>. Binaires arm64 uniquement.</p>
+    </details>
+    <details>
+      <summary>Vérifier une archive</summary>
+      <p>Empreintes SHA-256 dans <a href="https://github.com/lucasperrin3010-lang/SEKAI-UTAU/releases/download/v1.0.13/SHA256SUMS.txt">SHA256SUMS.txt</a>.</p>
+    </details>
+  </section>
+
+  <section class="block faq">
+    <h2>Questions posées</h2>
+    <details>
+      <summary>Faut-il acheter une voix pour commencer ?</summary>
+      <p>Non. Les banques UTAU libres et les modèles DiffSinger suffisent. L'app en détecte automatiquement dans son dossier <code>Singers</code>.</p>
+    </details>
+    <details>
+      <summary>Mes banques VOCALOID ou CeVIO AI n'apparaissent pas, c'est un bug ?</summary>
+      <p>Non : leurs données sont chiffrées et sous licence, sans format de banque lisible par un tiers. L'app les repère et affiche la marche à suivre (export WAV + MIDI depuis le logiciel d'origine).</p>
+    </details>
+    <details>
+      <summary>Le mode duo marche-t-il entre deux ordinateurs ?</summary>
+      <p>Oui, par fichier <code>.ustx</code>. Pas de synchronisation automatique, pas de serveur : c'est la partie encore en développement.</p>
+    </details>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <p>
+    <strong>SEKAI UTAU</strong> — dérivé d'OpenUtau (MIT, © 2014 StAkira).
+    Site du projet, sans lien avec Yamaha ni Techno-Speech.
+  </p>
+  <p class="fine">
+    VOCALOID, CeVIO et VoiSona sont des marques de leurs propriétaires ; aucun de leurs visuels
+    ni textes n'est utilisé ici.
+  </p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
