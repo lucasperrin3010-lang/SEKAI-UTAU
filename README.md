@@ -6,6 +6,8 @@ translucides, clavier jouable en bas de fenêtre, couleurs personnalisables,
 enregistrement vidéo avec le son interne, et import de projets MIDI / UST / USTX /
 VSQ / VSQX / SVP / CCS / MusicXML / MXL.
 
+**Site du projet :** <https://lucasperrin3010-lang.github.io/SEKAI-UTAU/>
+
 Tous les noms du programme sont en SEKAI UTAU : exécutable `SekaiUtau`, assembly
 `SekaiUtau`, bundle macOS `SEKAI UTAU.app`, dossiers de projet `SekaiUtau*`.
 
