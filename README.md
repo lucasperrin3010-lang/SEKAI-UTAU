@@ -18,12 +18,19 @@ Les paquets prêts à l'emploi sont dans les
 
 | Système | Fichier |
 |---|---|
-| Windows 64 bits | [SEKAI-UTAU-win-x64.zip](https://github.com/lucasperrin3010-lang/SEKAI-UTAU/releases/download/v1.0.6/SEKAI-UTAU-win-x64.zip) |
-| Linux x86_64 | [SEKAI-UTAU-linux-x64.tar.gz](https://github.com/lucasperrin3010-lang/SEKAI-UTAU/releases/download/v1.0.6/SEKAI-UTAU-linux-x64.tar.gz) |
-| macOS Apple Silicon | [SEKAI-UTAU-osx-arm64.zip](https://github.com/lucasperrin3010-lang/SEKAI-UTAU/releases/download/v1.0.6/SEKAI-UTAU-osx-arm64.zip) |
+| Windows 64 bits | [SEKAI-UTAU-win-x64.zip](https://github.com/lucasperrin3010-lang/SEKAI-UTAU/releases/download/v1.0.31/SEKAI-UTAU-win-x64.zip) |
+| Linux x86_64 | [SEKAI-UTAU-linux-x64.tar.gz](https://github.com/lucasperrin3010-lang/SEKAI-UTAU/releases/download/v1.0.31/SEKAI-UTAU-linux-x64.tar.gz) |
+| macOS Apple Silicon | [SEKAI-UTAU-osx-arm64.zip](https://github.com/lucasperrin3010-lang/SEKAI-UTAU/releases/download/v1.0.31/SEKAI-UTAU-osx-arm64.zip) |
+| Windows 64 bits (installateur) | [SEKAI-UTAU-Setup-1.0.31.exe](https://github.com/lucasperrin3010-lang/SEKAI-UTAU/releases/download/v1.0.31/SEKAI-UTAU-Setup-1.0.31.exe) |
+| Android 6.0+ (créer une voicebank) | [SEKAI-UTAU-Voicebank-1.1.apk](https://github.com/lucasperrin3010-lang/SEKAI-UTAU/releases/download/v1.0.31/SEKAI-UTAU-Voicebank-1.1.apk) |
 
 Chaque paquet contient une notice d'installation (`A-LIRE-AVANT-INSTALLATION.txt`)
 et les empreintes SHA-256 sont fournies dans `SHA256SUMS.txt`.
+
+L'application **iOS** de création de voicebank (iPhone/iPad) est fournie en
+source dans `SekaiUtau.Voicebank.iOS` : elle se compile sur un Mac avec
+`bin/build-voicebank-ipa.sh`. Aucune IPA signée n'est publiée, la signature
+exigeant un Mac avec Xcode et un identifiant Apple.
 
 ## Installation en bref
 
