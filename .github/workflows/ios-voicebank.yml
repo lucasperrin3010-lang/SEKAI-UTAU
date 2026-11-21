@@ -34,7 +34,7 @@ jobs:
         run: |
           dotnet publish SekaiUtau.Voicebank.iOS/SekaiUtau.Voicebank.iOS.csproj \
             -c Release -f net10.0-ios -p:RuntimeIdentifier=ios-arm64 \
-            -p:CodesignDisableSigning=true -o out
+            -p:EnableCodeSigning=false -o out
       - name: Paquet IPA
         run: |
           set -euo pipefail
