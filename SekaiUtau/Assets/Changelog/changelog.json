@@ -1,6 +1,32 @@
 ﻿{
   "entries": [
     {
+      "version": "1.0.34",
+      "date": {
+        "fr": "21 novembre 2026",
+        "en": "November 21, 2026"
+      },
+      "title": {
+        "fr": "Oto.ini automatique : le debut et la fin des prises.",
+        "en": "Automatic oto.ini: where takes start and end."
+      },
+      "changes": {
+        "fr": [
+          "Le debut de la prise se cale sur le bruit de fond mesure, plus sur un seuil fixe a 12 dB sous le pic. Une prise deja coupee par l'enregistreur garde maintenant sa consonne : le h, le s ou le f ne passent plus sous silence et l'offset ne tombe plus au milieu du souffle.",
+          "Sur une prise qui garde son silence, les consonnes douces sont enfin jouees : l'offset se posait sur le silence et la consonne etait sautee a chaque note.",
+          "La fin de voyelle est cherchee a 8 dB sous la voyelle au lieu de 12 dB, donc les prises calmes ne sont plus coupees trop tot.",
+          "L'enregistreur de bureau et l'export de voicebank du telephone indiquent que la prise est deja coupee, et deux tests automatiques couvrent ces cas avec une prise ha."
+        ],
+        "en": [
+          "A take now starts where the measured noise floor is instead of a fixed threshold 12 dB below the peak. A take already trimmed by the recorder keeps its consonant: h, s and f are no longer silenced and the offset no longer lands in the middle of the breath.",
+          "On a take that keeps its silence, soft consonants are finally played: the offset used to sit on the silence and the consonant was skipped on every note.",
+          "The end of the vowel is found 8 dB below the vowel instead of 12 dB, so quiet takes are no longer cut too early.",
+          "The desktop recorder and the phone voicebank export mark the take as already trimmed, and two automatic tests cover these cases with a ha take."
+        ]
+      },
+      "images": []
+    },
+    {
       "version": "1.0.33",
       "date": {
         "fr": "20 novembre 2026",
