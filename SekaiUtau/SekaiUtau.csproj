@@ -14,7 +14,7 @@
     <SatelliteResourceLanguages>none</SatelliteResourceLanguages>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <Version>1.0.34</Version>
+    <Version>1.0.35</Version>
     <ApplicationIcon Condition="'$(Mobile)' != 'true'">Assets\sekai-utau.ico</ApplicationIcon>
     <PublishReadyToRun Condition="'$(Mobile)' != 'true'">true</PublishReadyToRun>
     <!-- Edition mobile : meme code, meme interface, mais application Android. -->
@@ -33,8 +33,8 @@
     <CFBundleName>SEKAI UTAU</CFBundleName>
     <CFBundleDisplayName>SEKAI UTAU</CFBundleDisplayName>
     <CFBundleIdentifier>com.stakira.sekaiutau</CFBundleIdentifier>
-    <CFBundleVersion>1.0.34</CFBundleVersion>
-    <CFBundleShortVersionString>1.0.34</CFBundleShortVersionString>
+    <CFBundleVersion>1.0.35</CFBundleVersion>
+    <CFBundleShortVersionString>1.0.35</CFBundleShortVersionString>
     <CFBundlePackageType>APPL</CFBundlePackageType>
     <CFBundleSignature>????</CFBundleSignature>
     <CFBundleExecutable>SekaiUtau</CFBundleExecutable>

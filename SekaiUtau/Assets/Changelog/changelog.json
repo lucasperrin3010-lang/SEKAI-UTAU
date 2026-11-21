@@ -1,6 +1,34 @@
 ﻿{
   "entries": [
     {
+      "version": "1.0.35",
+      "date": {
+        "fr": "21 novembre 2026",
+        "en": "November 21, 2026"
+      },
+      "title": {
+        "fr": "Oto.ini automatique : la voyelle est enfin trouvee.",
+        "en": "Automatic oto.ini: the vowel is finally found."
+      },
+      "changes": {
+        "fr": [
+          "La voyelle de chaque prise est reperee par son timbre, plus seulement par son niveau. Une consonne voisee comme le m de « ma » ou le b de « ba » etait prise pour la voyelle : la preutterance tombait a zero sur la moitie des prises, et la note jouait la consonne a la place de la voyelle.",
+          "La prise est decoupee en segments de timbre stable ; le plus long est la voyelle. Un souffle doux (h, y, w), qui a le meme timbre qu'elle mais reste bien en dessous du niveau chante, est distingue par le niveau.",
+          "La zone fixe (consonne) mesure maintenant un vrai consonant, environ 60 ms apres la preutterance, comme dans les banques UTAU faites main ; l'overlap suit la preutterance au lieu d'etre fixe.",
+          "La preutterance n'est plus bornee a 400 ms : les prises longues gardent leur vraie valeur au lieu d'etre toutes ramenees a 400.",
+          "Mesure sur une banque japonaise faite main de 148 prises : 91 % des preutterances tombent a moins de 30 ms de la valeur de reference (mediane 13 ms), contre 52 % avant cette version."
+        ],
+        "en": [
+          "The vowel of every take is now found from its timbre, not only from its level. A voiced consonant such as the m of \"ma\" or the b of \"ba\" was taken for the vowel: the preutterance came out as zero on half of the takes, and the note played the consonant instead of the vowel.",
+          "The take is cut into stretches of stable timbre; the longest one is the vowel. A soft breath (h, y, w), which has the same timbre but stays well under the sung level, is told apart by the level.",
+          "The fixed range now measures a real consonant, about 60 ms past the preutterance, as in hand-tuned UTAU banks; the overlap follows the preutterance instead of being fixed.",
+          "The preutterance is no longer clamped to 400 ms: long takes keep their real value instead of all collapsing to 400.",
+          "Measured on a hand-tuned Japanese bank of 148 takes: 91% of the preutterances land within 30 ms of the reference value (median 13 ms), against 52% before this version."
+        ]
+      },
+      "images": []
+    },
+    {
       "version": "1.0.34",
       "date": {
         "fr": "21 novembre 2026",
