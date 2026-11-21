@@ -1,13 +1,14 @@
 name: Voicebank iOS
 
-# Compile l'édition iOS de l'app voicebank sur un runner macOS, pour vérifier
-# qu'elle compile sans avoir de Mac. Ne produit pas d'IPA signée : la signature
-# demande un certificat Apple (voir bin/build-voicebank-ipa.sh).
+# Compile l'edition iOS de l'app voicebank sur un runner macOS et produit un IPA
+# NON SIGNE (Payload/*.app zippe). Windows ne peut pas compiler iOS : Apple exige
+# macOS et Xcode. L'IPA non signee s'installe ensuite sur un iPhone depuis
+# Windows avec Sideloadly (compte Apple gratuit : 7 jours, a resigner ensuite).
 on:
   workflow_dispatch:
 
 jobs:
-  compile:
+  ipa:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,7 +18,23 @@ jobs:
             10.0.x
       - name: Charge de travail iOS
         run: dotnet workload install ios
-      - name: Compilation (simulateur, sans signature)
+      - name: Compilation (appareil, sans signature)
         run: |
-          dotnet build SekaiUtau.Voicebank.iOS/SekaiUtau.Voicebank.iOS.csproj \
-            -c Release -f net10.0-ios -p:RuntimeIdentifier=iossimulator-arm64
+          dotnet publish SekaiUtau.Voicebank.iOS/SekaiUtau.Voicebank.iOS.csproj \
+            -c Release -f net10.0-ios -p:RuntimeIdentifier=ios-arm64 \
+            -p:CodesignDisableSigning=true -o out
+      - name: Paquet IPA
+        run: |
+          set -euo pipefail
+          ls -la out
+          APP=$(find out -maxdepth 1 -name '*.app' | head -1)
+          echo "app: $APP"
+          mkdir -p Payload
+          cp -R "$APP" Payload/
+          zip -qry SEKAI-UTAU-Voicebank-non-signee.ipa Payload
+          ls -lh SEKAI-UTAU-Voicebank-non-signee.ipa
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ipa-non-signee
+          path: SEKAI-UTAU-Voicebank-non-signee.ipa
+          if-no-files-found: error
