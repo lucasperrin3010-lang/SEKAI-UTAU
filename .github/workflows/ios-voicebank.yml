@@ -17,7 +17,16 @@ jobs:
           dotnet-version: |
             10.0.x
       - name: Charge de travail iOS
-        run: dotnet workload install ios
+        run: |
+          dotnet workload install ios
+          # Le runner macOS a un Xcode plus recent que le pack iOS livre avec le SDK :
+          # sans cette mise a jour, la compilation s'arrete sur une exigence de version.
+          dotnet workload update
+          dotnet workload list
+      - name: Versions Xcode disponibles
+        run: |
+          ls -d /Applications/Xcode*.app 2>/dev/null || true
+          xcodebuild -version
       - name: Compilation (appareil, sans signature)
         run: |
           dotnet publish SekaiUtau.Voicebank.iOS/SekaiUtau.Voicebank.iOS.csproj \
