@@ -18,10 +18,9 @@ jobs:
             10.0.x
       - name: Charge de travail iOS
         run: |
+          # Ne pas lancer « dotnet workload update » : il installe un pack iOS
+          # (27.x) qui exige un Xcode plus recent que celui de l'image.
           dotnet workload install ios
-          # Le runner macOS a un Xcode plus recent que le pack iOS livre avec le SDK :
-          # sans cette mise a jour, la compilation s'arrete sur une exigence de version.
-          dotnet workload update
           dotnet workload list
       - name: Xcode attendu par le pack iOS
         run: |
