@@ -1,0 +1,64 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        xmlns:vm="using:SekaiUtau.App.ViewModels"
+        x:DataType="vm:WhatsNewViewModel"
+        x:Class="SekaiUtau.App.Views.WhatsNewDialog"
+        Width="640" Height="660" MinWidth="420" MinHeight="360"
+        WindowStartupLocation="CenterOwner"
+        Icon="/Assets/sekai-utau.ico"
+        Title="{DynamicResource whatsnew.caption}">
+  <Grid RowDefinitions="Auto,*,Auto">
+    <StackPanel Grid.Row="0" Orientation="Vertical" HorizontalAlignment="Center" Margin="24,20,24,8">
+      <Image Height="16" Source="/Assets/logotype.png" IsVisible="{Binding !IsDarkMode}"/>
+      <Image Height="16" Source="/Assets/logotype-w.png" IsVisible="{Binding IsDarkMode}"/>
+      <TextBlock Margin="0,8,0,0" TextAlignment="Center" Opacity="0.75"
+                 Text="{Binding CurrentVersionLabel}"/>
+    </StackPanel>
+    <ScrollViewer Grid.Row="1" Margin="24,4,24,0" VerticalScrollBarVisibility="Auto">
+      <ItemsControl ItemsSource="{Binding Entries}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:WhatsNewEntry">
+            <StackPanel Margin="0,0,0,20">
+              <TextBlock Text="{Binding Header}" FontSize="20" FontWeight="SemiBold"/>
+              <TextBlock Text="{Binding Date}" FontSize="12" Opacity="0.7" Margin="0,2,0,0"/>
+              <TextBlock Text="{Binding Title}" Margin="0,8,0,0" TextWrapping="Wrap"
+                         IsVisible="{Binding HasTitle}"/>
+              <ItemsControl ItemsSource="{Binding Changes}" Margin="0,10,0,0">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:WhatsNewChange">
+                    <Grid ColumnDefinitions="16,*" Margin="0,3">
+                      <TextBlock Grid.Column="0" Text="{Binding Bullet}"/>
+                      <TextBlock Grid.Column="1" Text="{Binding Text}" TextWrapping="Wrap"/>
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <ItemsControl ItemsSource="{Binding Images}" Margin="0,12,0,0">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:WhatsNewImage">
+                    <StackPanel Margin="0,0,0,12">
+                      <Border CornerRadius="6" ClipToBounds="True" BorderThickness="1"
+                              BorderBrush="{DynamicResource NeutralAccentBrushSemi}">
+                        <Image Source="{Binding Image}" MaxHeight="240" Stretch="Uniform"/>
+                      </Border>
+                      <TextBlock Text="{Binding Caption}" IsVisible="{Binding HasCaption}"
+                                 FontSize="11" Opacity="0.7" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                    </StackPanel>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
+                Spacing="12" Margin="24,14,24,20">
+      <Button Width="150" Content="{DynamicResource whatsnew.close}" Click="OnClose"/>
+      <Button Width="180" Content="{DynamicResource whatsnew.github}" Click="OnGithub"/>
+    </StackPanel>
+  </Grid>
+</Window>

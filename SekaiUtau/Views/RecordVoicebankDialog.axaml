@@ -1,0 +1,118 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        x:Class="SekaiUtau.App.Views.RecordVoicebankDialog"
+        Icon="/Assets/sekai-utau.ico"
+        Title="{DynamicResource voicebank.record.title}"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False" SizeToContent="Height" Width="520" MaxHeight="900">
+  <ScrollViewer>
+  <StackPanel Margin="18" Spacing="8">
+    <TextBlock Text="{DynamicResource voicebank.record.help}" TextWrapping="Wrap" Opacity="0.85"/>
+
+    <StackPanel Name="SetupPanel" Spacing="8">
+      <TextBlock Margin="0,6,0,0" Text="{DynamicResource voicebank.create.name}"/>
+      <TextBox Name="NameBox" Watermark="{DynamicResource voicebank.create.name.watermark}"/>
+      <TextBlock Margin="0,4,0,0" Text="{DynamicResource voicebank.create.author}"/>
+      <TextBox Name="AuthorBox"/>
+      <TextBlock Margin="0,8,0,0" Text="{DynamicResource voicebank.record.language}"/>
+      <ComboBox Name="LanguageBox" HorizontalAlignment="Stretch"/>
+      <TextBlock Name="LanguageHint" TextWrapping="Wrap" Opacity="0.7" FontSize="11"/>
+
+      <TextBlock Margin="0,8,0,0" Text="{DynamicResource voicebank.record.mic}"/>
+      <ComboBox Name="MicBox" HorizontalAlignment="Stretch"/>
+
+      <TextBlock Margin="0,8,0,0" Text="{DynamicResource voicebank.record.script}"/>
+      <ComboBox Name="ScriptBox" HorizontalAlignment="Stretch"/>
+
+      <TextBlock Margin="0,8,0,0" Name="OtoLabel"/>
+      <ComboBox Name="OtoBox" HorizontalAlignment="Stretch"/>
+      <TextBlock Name="OtoHint" TextWrapping="Wrap" Opacity="0.7" FontSize="11"/>
+
+      <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,8,0,0">
+        <CheckBox Name="LevelBox" IsChecked="True"/>
+        <CheckBox Name="AutoPlayBox"/>
+      </StackPanel>
+
+      <TextBlock Margin="0,8,0,0" Text="{DynamicResource voicebank.create.photo}"/>
+      <Grid ColumnDefinitions="76,*">
+        <Border Width="76" Height="76" CornerRadius="8" ClipToBounds="True"
+                Background="#24262A" BorderBrush="#3A3D42" BorderThickness="1">
+          <Image Name="PhotoPreview" Stretch="UniformToFill"/>
+        </Border>
+        <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center" Spacing="6">
+          <TextBlock Name="PhotoName" Text="{DynamicResource voicebank.create.photo.none}"
+                     TextWrapping="Wrap" Opacity="0.75"/>
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <Button Content="{DynamicResource voicebank.create.photo.choose}" Click="OnChoosePhoto"/>
+            <Button Content="{DynamicResource voicebank.create.photo.remove}" Click="OnRemovePhoto"/>
+          </StackPanel>
+        </StackPanel>
+      </Grid>
+
+      <TextBlock Margin="0,8,0,0" Text="{DynamicResource voicebank.create.portrait}"/>
+      <Grid ColumnDefinitions="76,*">
+        <Border Width="76" Height="104" CornerRadius="8" ClipToBounds="True"
+                Background="#24262A" BorderBrush="#3A3D42" BorderThickness="1">
+          <Image Name="PortraitPreview" Stretch="UniformToFill"/>
+        </Border>
+        <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center" Spacing="6">
+          <TextBlock Text="{DynamicResource voicebank.create.portrait.help}" TextWrapping="Wrap" Opacity="0.75"/>
+          <TextBlock Name="PortraitName" Text="{DynamicResource voicebank.create.photo.none}"
+                     TextWrapping="Wrap" Opacity="0.75"/>
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <Button Content="{DynamicResource voicebank.create.portrait.choose}" Click="OnChoosePortrait"/>
+            <Button Content="{DynamicResource voicebank.create.photo.remove}" Click="OnRemovePortrait"/>
+          </StackPanel>
+        </StackPanel>
+      </Grid>
+
+      <TextBlock Margin="0,4,0,0" Text="{DynamicResource voicebank.create.folder}"/>
+      <TextBlock Name="PathBox" Opacity="0.7" TextWrapping="Wrap"/>
+      <TextBlock Name="SetupError" Foreground="#E0655C" TextWrapping="Wrap" IsVisible="False"/>
+    </StackPanel>
+
+    <StackPanel Name="RecordPanel" Spacing="8" IsVisible="False">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Name="ProgressText" VerticalAlignment="Center" Opacity="0.8"/>
+        <TextBlock Grid.Column="1" Name="RecordedText" VerticalAlignment="Center" Opacity="0.8"/>
+      </Grid>
+      <ProgressBar Name="ScriptBar" Minimum="0" Maximum="1" Height="4"
+                   ToolTip.Tip="{DynamicResource voicebank.record.progress.hint}"/>
+      <Border Background="#24262A" BorderBrush="#3A3D42" BorderThickness="1" CornerRadius="10" Padding="0,16">
+        <StackPanel Spacing="6">
+          <TextBlock Name="SyllableText" FontSize="44" HorizontalAlignment="Center"/>
+          <TextBlock Name="SyllableHint" HorizontalAlignment="Center" Opacity="0.75"
+                     TextWrapping="Wrap" TextAlignment="Center" Margin="12,0"/>
+        </StackPanel>
+      </Border>
+      <ProgressBar Name="LevelBar" Minimum="0" Maximum="100" Height="6"/>
+      <TextBlock Name="RecordError" Foreground="#E0655C" TextWrapping="Wrap" IsVisible="False"/>
+      <TextBlock Name="NoticeText" Foreground="#E8B457" TextWrapping="Wrap" FontSize="11" IsVisible="False"/>
+      <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" Margin="0,4,0,0">
+        <Button Name="PrevButton" Content="◀" Click="OnPrevious" MinWidth="48"
+                ToolTip.Tip="{DynamicResource voicebank.record.prev.hint}"/>
+        <Button Name="RecordButton" Click="OnRecordToggle" MinWidth="150"/>
+        <Button Name="PlayButton" Click="OnPlay"/>
+        <Button Name="NextButton" Content="▶" Click="OnNext" MinWidth="48"
+                ToolTip.Tip="{DynamicResource voicebank.record.next.hint}"/>
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
+        <Button Name="SkipButton" Click="OnSkip"/>
+        <CheckBox Name="AutoStopBox" Content="Arrêt automatique" IsChecked="True" VerticalAlignment="Center"
+                  ToolTip.Tip="{DynamicResource voicebank.record.autostop.hint}"/>
+      </StackPanel>
+      <TextBlock Text="{DynamicResource voicebank.record.keys}" Opacity="0.55" FontSize="11"
+                 HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"/>
+    </StackPanel>
+
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,10,0,0">
+      <Button Content="{DynamicResource voicebank.create.cancel}" Click="OnCancel"/>
+      <Button Name="StartButton" Content="{DynamicResource voicebank.record.start}" Click="OnStart"/>
+      <Button Name="FinishButton" IsVisible="False" Click="OnFinish"/>
+    </StackPanel>
+  </StackPanel>
+  </ScrollViewer>
+</Window>

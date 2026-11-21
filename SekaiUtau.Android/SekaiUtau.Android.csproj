@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-android</TargetFramework>
+    <SupportedOSPlatformVersion>23</SupportedOSPlatformVersion>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationId>com.sekaiutau.mobile</ApplicationId>
+    <ApplicationVersion>28</ApplicationVersion>
+    <ApplicationDisplayVersion>1.0.28</ApplicationDisplayVersion>
+    <AndroidPackageFormat>apk</AndroidPackageFormat>
+    <!-- Les assemblys doivent voyager dans l'APK : sinon l'app ne demarre pas
+         quand on l'installe sur un telephone (ou un emulateur) sans Fast Deployment. -->
+    <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+    <!-- L'AOT de Mono casse sur System.Private.Windows.Core (dependance du coeur
+         audio) : on reste en JIT, largement suffisant pour l'edition mobile. -->
+    <RunAOTCompilation>false</RunAOTCompilation>
+    <Version>1.0.28</Version>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Android" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SekaiUtau.Mobile\SekaiUtau.Mobile.csproj" />
+  </ItemGroup>
+</Project>

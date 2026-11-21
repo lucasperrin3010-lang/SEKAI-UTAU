@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="SekaiUtau.Mobile.MainView">
+  <ScrollViewer>
+    <StackPanel Margin="20" Spacing="14" MaxWidth="720">
+      <TextBlock Text="SEKAI UTAU" FontSize="30" FontWeight="Bold"/>
+      <TextBlock Name="VersionText" FontSize="13" Opacity="0.7"/>
+
+      <Border Background="#24262A" CornerRadius="12" Padding="16">
+        <StackPanel Spacing="10">
+          <TextBlock Text="Ouvrir un projet" FontSize="17" FontWeight="SemiBold"/>
+          <TextBlock Text="Choisis un fichier .sekaiu ou .ustx : le nom, la taille et le nombre de pistes s'affichent ici."
+                     TextWrapping="Wrap" Opacity="0.75"/>
+          <Button Name="OpenButton" Content="Choisir un projet..." HorizontalAlignment="Left"/>
+        </StackPanel>
+      </Border>
+
+      <Border Name="ProjectCard" Background="#1F2124" CornerRadius="12" Padding="16" IsVisible="False">
+        <StackPanel Spacing="6">
+          <TextBlock Name="ProjectName" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap"/>
+          <TextBlock Name="ProjectInfo" Opacity="0.75" TextWrapping="Wrap"/>
+          <TextBlock Name="ProjectSummary" Opacity="0.75" TextWrapping="Wrap"/>
+        </StackPanel>
+      </Border>
+
+      <Border Background="#1B1D20" CornerRadius="12" Padding="16">
+        <StackPanel Spacing="6">
+          <TextBlock Text="Ce que fait cette édition mobile" FontWeight="SemiBold"/>
+          <TextBlock TextWrapping="Wrap" Opacity="0.75"
+                     Text="• ouvrir et lire un projet .sekaiu / .ustx ;&#10;• afficher ses informations (pistes, notes)."/>
+          <TextBlock Text="Pas encore disponible sur téléphone" FontWeight="SemiBold" Margin="0,8,0,0"/>
+          <TextBlock TextWrapping="Wrap" Opacity="0.75"
+                     Text="• lecture audio et rendu vocal : le moteur du bureau lance des resamplers externes, il faut le porter ;&#10;• enregistrement vidéo (capture d'écran Windows) ;&#10;• édition des notes au doigt.&#10;Ces parties arrivent dans les prochaines versions mobiles."/>
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

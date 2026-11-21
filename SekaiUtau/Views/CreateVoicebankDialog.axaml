@@ -1,0 +1,59 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        x:Class="SekaiUtau.App.Views.CreateVoicebankDialog"
+        Icon="/Assets/sekai-utau.ico"
+        Title="{DynamicResource voicebank.create.title}"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False" SizeToContent="Height" Width="480">
+  <StackPanel Margin="18" Spacing="8">
+    <TextBlock Text="{DynamicResource voicebank.create.help}" TextWrapping="Wrap" Opacity="0.85"/>
+    <TextBlock Margin="0,6,0,0" Text="{DynamicResource voicebank.create.name}"/>
+    <TextBox Name="NameBox" Watermark="{DynamicResource voicebank.create.name.watermark}"/>
+    <TextBlock Margin="0,4,0,0" Text="{DynamicResource voicebank.create.author}"/>
+    <TextBox Name="AuthorBox"/>
+
+    <TextBlock Margin="0,8,0,0" Text="{DynamicResource voicebank.create.photo}"/>
+    <Grid ColumnDefinitions="76,*">
+      <Border Width="76" Height="76" CornerRadius="8" ClipToBounds="True"
+              Background="#24262A" BorderBrush="#3A3D42" BorderThickness="1">
+        <Image Name="PhotoPreview" Stretch="UniformToFill"/>
+      </Border>
+      <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center" Spacing="6">
+        <TextBlock Name="PhotoName" Text="{DynamicResource voicebank.create.photo.none}"
+                   TextWrapping="Wrap" Opacity="0.75"/>
+        <StackPanel Orientation="Horizontal" Spacing="6">
+          <Button Content="{DynamicResource voicebank.create.photo.choose}" Click="OnChoosePhoto"/>
+          <Button Content="{DynamicResource voicebank.create.photo.remove}" Click="OnRemovePhoto"/>
+        </StackPanel>
+      </StackPanel>
+    </Grid>
+
+    <TextBlock Margin="0,8,0,0" Text="{DynamicResource voicebank.create.portrait}"/>
+    <Grid ColumnDefinitions="76,*">
+      <Border Width="76" Height="104" CornerRadius="8" ClipToBounds="True"
+              Background="#24262A" BorderBrush="#3A3D42" BorderThickness="1">
+        <Image Name="PortraitPreview" Stretch="UniformToFill"/>
+      </Border>
+      <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center" Spacing="6">
+        <TextBlock Text="{DynamicResource voicebank.create.portrait.help}" TextWrapping="Wrap" Opacity="0.75"/>
+        <TextBlock Name="PortraitName" Text="{DynamicResource voicebank.create.photo.none}"
+                   TextWrapping="Wrap" Opacity="0.75"/>
+        <StackPanel Orientation="Horizontal" Spacing="6">
+          <Button Content="{DynamicResource voicebank.create.portrait.choose}" Click="OnChoosePortrait"/>
+          <Button Content="{DynamicResource voicebank.create.photo.remove}" Click="OnRemovePortrait"/>
+        </StackPanel>
+      </StackPanel>
+    </Grid>
+
+    <TextBlock Margin="0,4,0,0" Text="{DynamicResource voicebank.create.folder}"/>
+    <TextBlock Name="PathBox" Opacity="0.7" TextWrapping="Wrap"/>
+    <TextBlock Name="ErrorBox" Foreground="#E0655C" TextWrapping="Wrap" IsVisible="False"/>
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,10,0,0">
+      <Button Content="{DynamicResource voicebank.create.cancel}" Click="OnCancel"/>
+      <Button Content="{DynamicResource voicebank.create.ok}" Click="OnCreate"/>
+    </StackPanel>
+  </StackPanel>
+</Window>

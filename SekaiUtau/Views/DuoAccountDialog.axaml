@@ -1,0 +1,31 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        x:Class="SekaiUtau.App.Views.DuoAccountDialog"
+        Icon="/Assets/sekai-utau.ico"
+        Title="{DynamicResource duo.title}"
+        Width="480" Height="460" MinWidth="420" MinHeight="380"
+        WindowStartupLocation="CenterOwner">
+  <Grid Margin="16" RowDefinitions="Auto,*,Auto">
+    <StackPanel Spacing="2">
+      <TextBlock Text="{DynamicResource duo.wip}" TextWrapping="Wrap" Foreground="#E8A317" Margin="0,0,0,10"/>
+      <TextBlock Text="{DynamicResource duo.current}" FontWeight="SemiBold"/>
+      <TextBlock Name="CurrentText" TextWrapping="Wrap" Foreground="{DynamicResource ForegroundBrushSecondary}"/>
+    </StackPanel>
+    <ListBox Name="AccountList" Grid.Row="1" Margin="0,12"/>
+    <StackPanel Grid.Row="2" Spacing="8">
+      <TextBox Name="NameBox" Watermark="{DynamicResource duo.name}"/>
+      <TextBox Name="PasswordBox" PasswordChar="●" Watermark="{DynamicResource duo.password}"/>
+      <TextBlock Name="StatusText" TextWrapping="Wrap" Foreground="#E8A317" IsVisible="False"/>
+      <WrapPanel>
+        <Button Name="CreateButton" Content="{DynamicResource duo.create}" Margin="0,0,8,8" Click="OnCreate"/>
+        <Button Name="SignInButton" Content="{DynamicResource duo.signin}" Margin="0,0,8,8" Click="OnSignIn"/>
+        <Button Name="SignOutButton" Content="{DynamicResource duo.signout}" Margin="0,0,8,8" Click="OnSignOut"/>
+        <Button Name="DeleteButton" Content="{DynamicResource duo.delete}" Margin="0,0,8,8" Click="OnDelete"/>
+      </WrapPanel>
+      <Button Content="{DynamicResource duo.close}" HorizontalAlignment="Right" Click="OnClose"/>
+    </StackPanel>
+  </Grid>
+</Window>

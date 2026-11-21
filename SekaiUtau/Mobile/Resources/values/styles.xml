@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- Avalonia's activity derives from AppCompatActivity: it needs an AppCompat theme.
+       Colours match the desktop app (charcoal background). -->
+  <style name="SekaiTheme.NoActionBar" parent="Theme.AppCompat.NoActionBar">
+    <item name="android:windowBackground">#1B1C1F</item>
+    <item name="android:statusBarColor">#1B1C1F</item>
+    <item name="android:navigationBarColor">#1B1C1F</item>
+    <item name="android:windowLightStatusBar">false</item>
+  </style>
+</resources>

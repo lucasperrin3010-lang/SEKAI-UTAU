@@ -1,0 +1,52 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        xmlns:vm="using:SekaiUtau.App.ViewModels"
+        x:DataType="vm:UpdaterViewModel"
+        x:Class="SekaiUtau.App.Views.UpdaterDialog"
+        Width="460" Height="520" CanResize="False" WindowStartupLocation="CenterScreen"
+        Icon="/Assets/sekai-utau.ico"
+        Title="{DynamicResource updater.caption}" Closing="OnClosing">
+    <Grid RowDefinitions="Auto, Auto, Auto, Auto, *, Auto, Auto">
+        <StackPanel Grid.Row="0" Orientation="Vertical" HorizontalAlignment="Center" Margin="20,20,20,4">
+            <Image Width="80" Height="80" Source="/Assets/sekai-utau.ico"/>
+            <Image Height="16" Margin="0,8,0,0"
+                   Source="/Assets/logotype.png" IsVisible="{Binding !IsDarkMode}"/>
+            <Image Height="16" Margin="0,8,0,0"
+                   Source="/Assets/logotype-w.png" IsVisible="{Binding IsDarkMode}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Margin="40,4" Spacing="2">
+            <TextBlock TextAlignment="Center" Text="{Binding AppVersion}"/>
+            <TextBlock TextAlignment="Center" Text="{Binding LatestVersionLabel}" Opacity="0.7" FontSize="12"/>
+        </StackPanel>
+        <TextBlock Grid.Row="2" Margin="40,4" TextAlignment="Center"
+                   Text="{DynamicResource updater.description}"/>
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="40,8,40,0"
+                    HorizontalAlignment="Center" Spacing="10">
+            <TextBlock Text="{DynamicResource prefs.channel}" VerticalAlignment="Center"/>
+            <ComboBox SelectedIndex="{Binding Channel}" Width="120" IsEnabled="{Binding !UpdateAccepted}">
+                <ComboBoxItem Content="{DynamicResource prefs.channel.stable}"/>
+                <ComboBoxItem Content="{DynamicResource prefs.channel.beta}"/>
+                <ComboBoxItem Content="{DynamicResource prefs.channel.alpha}"/>
+            </ComboBox>
+        </StackPanel>
+        <ScrollViewer Grid.Row="4" Margin="40,12,40,0">
+            <StackPanel>
+                <TextBlock Text="{DynamicResource updater.notes}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                <SelectableTextBlock Text="{Binding ReleaseNotes}" TextWrapping="Wrap"
+                                     FontSize="12" Opacity="0.85"/>
+            </StackPanel>
+        </ScrollViewer>
+        <TextBlock Grid.Row="5" Margin="40,8" TextAlignment="Center"
+                   Text="{Binding UpdaterStatus}" FontWeight="Bold"/>
+        <StackPanel Grid.Row="6" Orientation="Horizontal" Margin="0,12,0,20"
+                    HorizontalAlignment="Center" Spacing="20">
+            <Button Width="140" Content="{DynamicResource updater.github}" Command="{Binding OnGithub}"/>
+            <Button Width="140" Content="{DynamicResource updater.update}" Command="{Binding OnUpdate}"
+                    IsEnabled="{Binding UpdateAvailable}"
+                    FontWeight="{Binding UpdateButtonFontWeight}"/>
+        </StackPanel>
+    </Grid>
+</Window>

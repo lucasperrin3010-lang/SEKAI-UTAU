@@ -1,0 +1,4 @@
+files:
+  - source: /SekaiUtau/Strings/Strings.axaml
+    translation: /SekaiUtau/Strings/Strings.%locale%.axaml
+    type: xaml

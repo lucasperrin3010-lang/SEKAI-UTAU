@@ -1,0 +1,43 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:SekaiUtau.App.ViewModels"
+        x:DataType="vm:TrackSettingsViewModel"
+        mc:Ignorable="d"
+        x:Class="SekaiUtau.App.Views.TrackSettingsDialog"
+        Icon="/Assets/sekai-utau.ico"
+        Title="{DynamicResource dialogs.tracksettings.caption}"
+        SizeToContent="Height" Width="320" WindowStartupLocation="CenterOwner" CanResize="False">
+  <Border Margin="{Binding $parent[Window].WindowDecorationMargin}">
+    <StackPanel Margin="8">
+      <TextBlock Text="{DynamicResource warning.renderer}" IsVisible="{Binding !HasRenderer}"/>
+      <TextBlock Text="{DynamicResource prefs.rendering.resampler}" IsVisible="{Binding NeedsResampler}"/>
+      <ComboBox Grid.Column="0" HorizontalAlignment="Stretch" IsVisible="{Binding NeedsResampler}"
+                ItemsSource="{Binding Resamplers}"
+                SelectedItem="{Binding Resampler}"/>
+      <Grid ColumnDefinitions="*,8,*" IsVisible="{Binding NeedsResampler}">
+        <Button Grid.Column="0" Content="{DynamicResource dialogs.tracksettings.location}"
+                HorizontalAlignment="Stretch" Command="{Binding OpenResamplerLocation}"/>
+        <Button Grid.Column="2" Content="{DynamicResource dialogs.tracksettings.setasdefault}"
+                HorizontalAlignment="Stretch" Command="{Binding SetDefaultResampler}"/>
+      </Grid>
+      <TextBlock Text="{DynamicResource prefs.rendering.wavtool}" IsVisible="{Binding NeedsWavtool}"/>
+      <ComboBox Grid.Column="1" HorizontalAlignment="Stretch" IsVisible="{Binding NeedsWavtool}"
+                ItemsSource="{Binding Wavtools}"
+                SelectedItem="{Binding Wavtool}"/>
+      <Grid ColumnDefinitions="*,8,*" IsVisible="{Binding NeedsWavtool}">
+        <Button Grid.Column="0" Content="{DynamicResource dialogs.tracksettings.location}"
+                HorizontalAlignment="Stretch" Command="{Binding OpenWavtoolLocation}"/>
+        <Button Grid.Column="2" Content="{DynamicResource dialogs.tracksettings.setasdefault}"
+                HorizontalAlignment="Stretch" Command="{Binding SetDefaultWavtool}"/>
+      </Grid>
+      <TextBlock Text="{DynamicResource tracks.expressiongraph}" IsVisible="{Binding HasRenderer}"/>
+      <ComboBox HorizontalAlignment="Stretch" IsVisible="{Binding HasRenderer}"
+                ItemsSource="{Binding Graphs}"
+                SelectedItem="{Binding Graph}"/>
+      <Button Grid.Column="2" Content="{DynamicResource button.ok}" Margin="0,8,0,0"
+              HorizontalAlignment="Stretch" Click="OnOkClicked"/>
+    </StackPanel>
+  </Border>
+</Window>

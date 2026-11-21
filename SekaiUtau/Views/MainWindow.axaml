@@ -1,0 +1,692 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:SekaiUtau.App.ViewModels"
+        xmlns:c="clr-namespace:SekaiUtau.App.Controls"
+        xmlns:api="using:SekaiUtau.Core.Ustx"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="650"
+        x:DataType="vm:MainWindowViewModel"
+        x:Class="SekaiUtau.App.Views.MainWindow"
+        x:CompileBindings="True"
+        Icon="/Assets/sekai-utau.ico"
+        Title="{Binding Title}" MinWidth="300" MinHeight="200" Width="{Binding Width}" Height="{Binding Height}"
+        Focusable="True" KeyDown="OnKeyDown" PointerPressed="OnPointerPressed" Closing="WindowClosing"
+        DragDrop.AllowDrop="True" TransparencyLevelHint="None">
+  <Window.Styles>
+    <Style Selector="Button,ToggleButton">
+      <Setter Property="Focusable" Value="False"/>
+    </Style>
+    <Style Selector="ToggleButton.record:checked Path">
+      <Setter Property="Fill" Value="#E5484D"/>
+    </Style>
+    <Style Selector="ToggleButton.recordbar">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderBrush" Value="White"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="6"/>
+    </Style>
+    <Style Selector="ToggleButton.recordbar:checked">
+      <Setter Property="Background" Value="#E5484D"/>
+      <Setter Property="BorderBrush" Value="#E5484D"/>
+    </Style>
+    <Style Selector="FlyoutPresenter.warnings">
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="CornerRadius" Value="0"/>
+      <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource MenuFlyoutPresenterBorderBrush}"/>
+      <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+      <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
+    </Style>
+  </Window.Styles>
+  <Grid>
+    <!-- User wallpaper, drawn behind the whole UI -->
+    <Image Source="{Binding Wallpaper}" IsVisible="{Binding HasWallpaper}"
+           Stretch="UniformToFill" Opacity="{Binding WallpaperOpacity}"
+           HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+           IsHitTestVisible="False"/>
+    <Grid Name="MainGrid" Margin="{Binding $parent[Window].WindowDecorationMargin}">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="32"/>
+        <RowDefinition Height="*"/>
+      </Grid.RowDefinitions>
+      <!-- Dark title bar, like the reference UI -->
+      <Border Grid.Row="0" Background="#232323" BorderBrush="#343434" BorderThickness="0,0,0,1">
+        <Grid>
+          <Path HorizontalAlignment="Left" VerticalAlignment="Center" Margin="14,0,0,0" Opacity="0.7"
+                Fill="White" Data="M 7,0 L 14,7 L 7,14 L 0,7 Z"/>
+          <Path HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,14,0" Opacity="0.7"
+                Fill="White" Data="M 7,0 L 14,7 L 7,14 L 0,7 Z"/>
+          <TextBlock Text="{Binding Title}" Foreground="White" FontSize="15" FontWeight="SemiBold"
+                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
+          <StackPanel Orientation="Horizontal" Spacing="6"
+                      HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,44,0">
+            <!-- Red recording indicator with elapsed time, only while recording -->
+            <Border IsVisible="{Binding IsRecording}" Background="#E5484D" CornerRadius="4" Padding="8,2">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <Ellipse Width="7" Height="7" Fill="White" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding RecordingTime}" Foreground="White" FontSize="12" FontWeight="SemiBold"/>
+              </StackPanel>
+            </Border>
+            <ToggleButton Classes="recordbar" IsChecked="{Binding IsRecording}" Click="OnRecordClick"
+                          VerticalAlignment="Center" Height="22" Padding="10,0"
+                          ToolTip.Tip="{DynamicResource record.tooltip}">
+              <TextBlock Text="{DynamicResource record.title}" Foreground="White" FontSize="12" FontWeight="SemiBold"/>
+            </ToggleButton>
+          </StackPanel>
+        </Grid>
+      </Border>
+      <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left"
+                  Margin="34,0,0,0" Height="26" ZIndex="2">
+        <Menu Height="24" Opened="OnMainMenuOpened" Closed="OnMainMenuClosed" PointerExited="OnMainMenuPointerLeave">
+          <MenuItem Header="{DynamicResource menu.file}" IsEnabled="{Binding Page}">
+            <MenuItem Header="{DynamicResource menu.file.new}" InputGesture="Ctrl+N" Click="OnMenuNew"/>
+            <MenuItem Header="{DynamicResource menu.file.newfromtemplate}" ItemsSource="{Binding OpenTemplatesMenuItems}" Classes="MenuItemWithSubMenu"/>
+            <MenuItem Header="{DynamicResource menu.file.savetemplate}" Click="OnMenuSaveTemplate"/>
+            <MenuItem Header="-" Height="1"/>
+            <MenuItem Header="{DynamicResource menu.file.open}" InputGesture="Ctrl+O" Click="OnMenuOpen"/>
+            <MenuItem Header="{DynamicResource menu.file.openrecent}" ItemsSource="{Binding OpenRecentMenuItems}" Classes="MenuItemWithSubMenu"/>
+            <MenuItem Header="{DynamicResource menu.file.openprojectlocation}" Click="OnMenuOpenProjectLocation"/>
+            <MenuItem Header="{DynamicResource menu.file.recordwindow}" Click="OnRecordClick"/>
+            <MenuItem Header="-" Height="1"/>
+            <MenuItem Header="{DynamicResource menu.file.save}" InputGesture="Ctrl+S" Click="OnMenuSave"/>
+            <MenuItem Header="{DynamicResource menu.file.saveas}"  InputGesture="Ctrl+Shift+S" Click="OnMenuSaveAs"/>
+            <MenuItem Header="-" Height="1"/>
+            <MenuItem Header="{DynamicResource menu.file.importtracks}" Click="OnMenuImportTracks"/>
+            <MenuItem Header="{DynamicResource menu.file.importaudio}" Click="OnMenuImportAudio"/>
+            <MenuItem Header="-" Height="1"/>
+            <MenuItem Header="{DynamicResource menu.file.exportaudio}">
+              <MenuItem Header="{DynamicResource menu.file.exportwav}" Click="OnMenuExportWav"/>
+              <MenuItem Header="{DynamicResource menu.file.exportwavto}" Click="OnMenuExportWavTo"/>
+              <MenuItem Header="{DynamicResource menu.file.exportmixdown}" Click="OnMenuExportMixdown"/>
+            </MenuItem>
+            <MenuItem Header="{DynamicResource menu.file.exportproject}">
+              <MenuItem Header="{DynamicResource menu.file.exportust}" Click="OnMenuExportUst"/>
+              <MenuItem Header="{DynamicResource menu.file.exportustto}" Click="OnMenuExportUstTo"/>
+              <MenuItem Header="{DynamicResource menu.file.exportmidi}" Click="OnMenuExportMidi"/>
+              <MenuItem Header="{DynamicResource menu.file.exportds}" Click="OnMenuExportDsTo"/>
+            </MenuItem>
+            <MenuItem Header="{DynamicResource menu.file.openexportlocation}" Click="OnMenuOpenProjectLocation"/>
+          </MenuItem>
+          <MenuItem Header="{DynamicResource menu.edit}" IsEnabled="{Binding Page}">
+            <MenuItem Header="{Binding UndoText}" InputGesture="Ctrl+Z" Command="{Binding Undo}" IsEnabled="{Binding CanUndo}"/>
+            <MenuItem Header="{Binding RedoText}" InputGesture="Ctrl+Y" Command="{Binding Redo}" IsEnabled="{Binding CanRedo}"/>
+          </MenuItem>
+          <MenuItem Header="{DynamicResource menu.project}" IsEnabled="{Binding Page}">
+            <MenuItem Header="{DynamicResource menu.project.expressions}" Click="OnMenuExpressionss"/>
+            <MenuItem Header="{DynamicResource menu.project.remaptimeaxis}" Click="OnMenuRemapTimeaxis"/>
+          </MenuItem>
+          <MenuItem Header="{DynamicResource menu.tools}">
+            <MenuItem Header="{DynamicResource menu.tools.layout}">
+              <MenuItem Header="{DynamicResource menu.tools.layout.reset}" Click="OnMenuLayoutReset"/>
+              <MenuItem Header="{DynamicResource menu.tools.layout.vsplit11}" Click="OnMenuLayoutVSplit11"/>
+              <MenuItem Header="{DynamicResource menu.tools.layout.vsplit12}" Click="OnMenuLayoutVSplit12"/>
+              <MenuItem Header="{DynamicResource menu.tools.layout.vsplit13}" Click="OnMenuLayoutVSplit13"/>
+              <MenuItem Header="{DynamicResource menu.tools.layout.hsplit11}" Click="OnMenuLayoutHSplit11"/>
+              <MenuItem Header="{DynamicResource menu.tools.layout.hsplit12}" Click="OnMenuLayoutHSplit12"/>
+              <MenuItem Header="{DynamicResource menu.tools.layout.hsplit13}" Click="OnMenuLayoutHSplit13"/>
+            </MenuItem>
+            <MenuItem Header="{DynamicResource menu.tools.fullscreen}" InputGesture="F11" Click="OnMenuFullScreen"/>
+            <MenuItem Header="{DynamicResource menu.tools.dawintegration}" Click="OnMenuDawIntegration"/>
+            <MenuItem Header="{Binding ClearCacheHeader}" Click="OnMenuClearCache"/>
+            <MenuItem Header="{DynamicResource menu.tools.debugwindow}" Click="OnMenuDeveloperWindow"/>
+            <MenuItem Header="{DynamicResource phoneticassistant.caption}" Click="OnMenuPhoneticAssistant"/>
+            <MenuItem Header="{DynamicResource menu.tools.singers}" Click="OnMenuSingers"/>
+            <MenuItem Header="{DynamicResource menu.tools.voicebank}" Click="OnMenuCreateVoicebank"/>
+            <MenuItem Header="{DynamicResource menu.tools.voicebank.record}" Click="OnMenuRecordVoicebank"/>
+            <MenuItem Header="{DynamicResource menu.tools.singer.install}" Click="OnMenuInstallSinger"/>
+            <MenuItem Header="{DynamicResource menu.tools.wavtoolresampler.install}" Click="OnMenuInstallWavtoolResampler"/>
+            <MenuItem Header="{DynamicResource menu.tools.packages}" Click="OnMenuPackageManager"/>
+            <MenuItem Header="{DynamicResource menu.tools.prefs}" Click="OnMenuPreferences"/>
+          </MenuItem>
+          <MenuItem Header="{DynamicResource menu.duo}">
+            <MenuItem Header="{Binding AccountHeader}" Click="OnMenuDuoAccount"/>
+            <MenuItem Header="-" Height="1"/>
+            <MenuItem Header="{DynamicResource menu.duo.claim}" Click="OnMenuDuoClaim"/>
+            <MenuItem Header="{DynamicResource menu.duo.export}" Click="OnMenuDuoExport"/>
+            <MenuItem Header="{DynamicResource menu.duo.import}" Click="OnMenuDuoImport"/>
+          </MenuItem>
+          <MenuItem Header="{DynamicResource menu.help}">
+            <MenuItem Header="{DynamicResource menu.help.wiki}" Click="OnMenuWiki"/>
+            <MenuItem Header="{DynamicResource menu.help.whatsnew}" Click="OnMenuWhatsNew"/>
+            <MenuItem Header="{DynamicResource menu.help.checkupdate}" Click="OnMenuCheckUpdate"/>
+            <MenuItem Header="{DynamicResource menu.help.reportissue}" Click="OnMenuReportIssue"/>
+            <MenuItem Header="{DynamicResource menu.help.logslocation}" Click="OnMenuLogsLocation"/>
+          </MenuItem>
+        </Menu>
+        <Button Name="WarningsButton" Classes="clear" Width="24" Height="24" Margin="0" Padding="0"
+                IsVisible="{Binding HasWarnings}" ToolTip.Tip="{DynamicResource warnings}">
+          <Path Width="14" Height="14" Stretch="Uniform" Fill="#E8A317"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Data="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z"/>
+          <Button.Flyout>
+            <Flyout Placement="BottomEdgeAlignedLeft" FlyoutPresenterClasses="warnings">
+              <StackPanel Width="380">
+                <Grid ColumnDefinitions="*,Auto" Margin="14,6,6,6">
+                  <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Text="{DynamicResource warnings}"/>
+                  <Button Grid.Column="1" Classes="clear" Margin="0" Height="24" Padding="8,0"
+                          Content="{DynamicResource warnings.clear}" Click="OnClearWarnings"/>
+                </Grid>
+                <Border Height="1" Background="{DynamicResource MenuFlyoutPresenterBorderBrush}"/>
+                <ScrollViewer MaxHeight="360" HorizontalScrollBarVisibility="Disabled">
+                  <ItemsControl ItemsSource="{Binding Warnings}" Margin="0,4">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:WarningItem">
+                        <Grid ColumnDefinitions="Auto,*,Auto" Margin="14,8,6,8">
+                          <Path Width="14" Height="14" Margin="0,2,10,0" VerticalAlignment="Top" Stretch="Uniform" Fill="#E8A317"
+                                Data="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z"/>
+                          <StackPanel Grid.Column="1" Spacing="4">
+                            <SelectableTextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                            <SelectableTextBlock Text="{Binding Detail}" FontSize="12" TextWrapping="Wrap"
+                                                 Foreground="{DynamicResource ForegroundBrushSecondary}"
+                                                 IsVisible="{Binding Detail, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                          </StackPanel>
+                          <Button Grid.Column="2" Classes="clear" Width="24" Height="24" Margin="6,-3,0,0" Padding="0"
+                                  VerticalAlignment="Top" ToolTip.Tip="{DynamicResource warnings.dismiss}" Click="OnDismissWarning">
+                            <Path Width="8" Height="8" Stretch="Uniform" StrokeThickness="1.5"
+                                  Stroke="{DynamicResource ForegroundBrushSecondary}"
+                                  Data="M0,0 L8,8 M8,0 L0,8"/>
+                          </Button>
+                        </Grid>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </ScrollViewer>
+              </StackPanel>
+            </Flyout>
+          </Button.Flyout>
+        </Button>
+      </StackPanel>
+      <Carousel Grid.Row="1" SelectedIndex="{Binding Page}" >
+        <!--Welcome page-->
+        <Grid Margin="60,50,60,40" RowDefinitions="Auto,Auto,Auto,*" ColumnDefinitions="*,*" KeyDown="OnCarouselPageKeyDown">
+          <!--Startup warnings-->
+          <StackPanel Grid.Row="0" Grid.ColumnSpan="2">
+            <Border IsVisible="{Binding HasRecovery}" Cursor="Hand" PointerPressed="OnWelcomeRecovery"
+                    Background="{DynamicResource WarningBrush}" CornerRadius="6"
+                    HorizontalAlignment="Stretch" Padding="14,10" Margin="0,0,0,18"
+                    ToolTip.Tip="{Binding RecoveryPath}">
+              <StackPanel Spacing="3">
+                <TextBlock Text="{Binding RecoveryString}" TextWrapping="Wrap" FontSize="13" FontWeight="SemiBold"
+                           Foreground="#1B1C1F"/>
+                <TextBlock Text="{Binding RecoveryPath}" TextWrapping="Wrap" FontSize="11" Opacity="0.8"
+                           Foreground="#1B1C1F"/>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+          <!--Create new project or open existing project-->
+          <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Spacing="8">
+            <TextBlock Text="{DynamicResource welcome.start}" FontSize="20"/>
+            <WrapPanel Margin="-4" Orientation="Horizontal">
+              <Button Margin="4" Click="OnMenuNew" Height="60" Padding="12">
+                <Grid ColumnDefinitions="Auto,*">
+                  <Viewbox
+                    Grid.RowSpan="2"
+                    Width="24"
+                    Height="24"
+                    Margin="8,4,12,4">
+                    <!--From https://github.com/microsoft/vscode-icons/blob/main/icons/light/new-file.svg-->
+                    <Path Classes="clear" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center"
+                      Data="M4.00024 7H3.00024V4H0.000244141V3H3.00024V0H4.00024V3H7.00024V4H4.00024V7ZM10.5002 1.09998L13.9003 4.59998L14.0002 5V13.5L13.5002 14H3.50024L3.00024 13.5V8H4.00024V13H13.0002V6H9.00024V2H5.00024V1H10.2002L10.5002 1.09998ZM10.0002 2V5H12.9003L10.0002 2Z"
+                      Fill="{StaticResource NeutralAccentBrush}"/>
+                  </Viewbox>
+
+                  <StackPanel Grid.Column="1"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Center"
+                    Margin="0,0,8,0">
+
+                    <TextBlock HorizontalAlignment="Stretch"
+                      Text="{DynamicResource welcome.new}"
+                      FontSize="14"
+                      FontWeight="Normal"
+                      TextWrapping="Wrap" />
+
+                    <TextBlock HorizontalAlignment="Stretch"
+                      Text="{DynamicResource welcome.new.description}"
+                      FontSize="12"
+                      FontWeight="Normal"
+                      TextWrapping="Wrap" />
+                  </StackPanel>
+                </Grid>
+              </Button>
+
+              <Button Margin="4" Click="OnMenuOpen" Height="60" Padding="12">
+                <Grid ColumnDefinitions="Auto,*">
+                  <Viewbox
+                    Grid.RowSpan="2"
+                    Width="24"
+                    Height="24"
+                    Margin="8,4,12,4">
+                    <!--From https://github.com/microsoft/vscode-icons/blob/main/icons/dark/go-to-file.svg-->
+                    <Path Classes="clear" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center"
+                      Data="M6 5.9142L8.06065 3.85356L8.06065 3.14645L5.91421 1L5.2071 1.70711L5.25 1.75L5.24998 1.75002L5.49997 2H5.5L6.49999 3H3.5C2.83696 3 2.20107 3.2634 1.73223 3.73224C1.26339 4.20108 1 4.83696 1 5.5C1 6.16305 1.26339 6.79893 1.73223 7.26777C2.20107 7.73661 2.83696 8 3.5 8H4V7H3.5C3.10218 7 2.72064 6.84197 2.43934 6.56066C2.15804 6.27936 2 5.89783 2 5.5C2 5.10218 2.15804 4.72065 2.43934 4.43934C2.72064 4.15804 3.10218 4 3.5 4H5V4.00003H5.49996L5.49999 4H6.49999L5.2071 5.29289L5.20711 5.29291L5.2071 5.29292L5.91421 6.00003L6 5.91423V5.9142ZM11 2H8.32838L7.32839 1H12L12.71 1.29L15.71 4.29L16 5V14L15 15H6L5 14V9.00003V6.50003L6 7.34699V14H15V6H11V2ZM12 2V5H15L12 2Z"
+                      Fill="{StaticResource NeutralAccentBrush}"/>
+                  </Viewbox>
+
+                  <StackPanel Grid.Column="1"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Center"
+                    Margin="0,0,8,0">
+
+                    <TextBlock HorizontalAlignment="Stretch"
+                      Text="{DynamicResource welcome.open}"
+                      FontSize="14"
+                      FontWeight="Normal"
+                      TextWrapping="Wrap" />
+
+                    <TextBlock HorizontalAlignment="Stretch"
+                      Text="{DynamicResource welcome.open.description}"
+                      FontSize="12"
+                      FontWeight="Normal"
+                      TextWrapping="Wrap" />
+                  </StackPanel>
+                </Grid>
+              </Button>
+            </WrapPanel>
+          </StackPanel>
+
+          <!-- Recent files -->
+          <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,24,0,8" Text="{DynamicResource welcome.recent}" FontSize="20"/>
+          <TextBlock Grid.Row="3" Grid.Column="0" Margin="18,10,15,0" VerticalAlignment="Top"
+                     FontSize="13" Opacity="0.6" TextWrapping="Wrap"
+                     IsVisible="{Binding !HasRecentFiles}"
+                     Text="{DynamicResource welcome.recent.empty}"/>
+          <ListBox ItemsSource="{Binding RecentFiles}" IsVisible="{Binding HasRecentFiles}" Grid.Row="3" Grid.Column="0" Margin="0,0,15,0" ScrollViewer.VerticalScrollBarVisibility="Auto" VerticalAlignment="Top"
+                   Background="Transparent" BorderThickness="0" MaxHeight="320">
+            <ListBox.Styles>
+              <Style Selector="ListBoxItem">
+                <Setter Property="Height" Value="NaN" />
+                <Setter Property="MinHeight" Value="48" />
+                <Setter Property="Padding" Value="16,0" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="CornerRadius" Value="6" />
+              </Style>
+              <Style Selector="ListBoxItem:pointerover">
+                <Setter Property="Background" Value="#22FFFFFF" />
+              </Style>
+            </ListBox.Styles>
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:RecentFileInfo">
+                <StackPanel Margin="0,4" PointerPressed="OnWelcomeRecent" Background="Transparent">
+                  <TextBlock FontSize="16" Text="{Binding Name}"/>
+                  <TextBlock FontSize="12" Text="{Binding ShortDirectory}" TextWrapping="Wrap" Opacity="0.75"
+                             ToolTip.Tip="{Binding PathName}"/>
+                </StackPanel>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+
+          <!-- Template files -->
+          <TextBlock Grid.Row="2" Grid.Column="1" Margin="15,24,0,8" Text="{DynamicResource welcome.template}" FontSize="20"/>
+          <TextBlock Grid.Row="3" Grid.Column="1" Margin="33,10,0,0" VerticalAlignment="Top"
+                     FontSize="13" Opacity="0.6" TextWrapping="Wrap"
+                     IsVisible="{Binding !HasTemplateFiles}"
+                     Text="{DynamicResource welcome.template.empty}"/>
+          <ListBox ItemsSource="{Binding TemplateFiles}" IsVisible="{Binding HasTemplateFiles}" Grid.Row="3" Grid.Column="1" Margin="15,0,0,0" ScrollViewer.VerticalScrollBarVisibility="Auto" VerticalAlignment="Top">
+            <ListBox.Styles>
+              <Style Selector="ListBoxItem">
+                <Setter Property="Height" Value="NaN" />
+                <Setter Property="MinHeight" Value="48" />
+                <Setter Property="Padding" Value="16,0" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+              </Style>
+            </ListBox.Styles>
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:RecentFileInfo">
+                <StackPanel Margin="0,4" PointerPressed="OnWelcomeTemplate" Background="Transparent">
+                  <TextBlock FontSize="16" Text="{Binding Name}"/>
+                </StackPanel>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </Grid>
+      
+        <!--Main page-->
+        <Grid ColumnDefinitions="300,*,24,300,46" Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" KeyDown="OnCarouselPageKeyDown">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="44"/>
+            <RowDefinition Height="26"/>
+            <RowDefinition Height="*" MinHeight="0.01"/>
+            <RowDefinition Height="4"/>
+            <RowDefinition Height="3*"
+                           MinHeight="{Binding PianoRollMinHeight}"
+                           MaxHeight="{Binding PianoRollMaxHeight}"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="4"/>
+          </Grid.RowDefinitions>
+          <!-- Arrangement header: caption over the track column, shaded transport strip behind the ruler. -->
+          <Border Grid.Row="0" Grid.ColumnSpan="5"
+                  Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                  BorderBrush="{DynamicResource MenuFlyoutPresenterBorderBrush}"
+                  BorderThickness="0,0,0,1"/>
+          <Border Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" Width="1" HorizontalAlignment="Right"
+                  Background="{DynamicResource MenuFlyoutPresenterBorderBrush}" IsHitTestVisible="False"/>
+          <TextBlock Grid.Row="1" Grid.Column="0" Text="ARRANGEMENT" Margin="14,0,0,0"
+                     VerticalAlignment="Center" FontSize="10" FontWeight="SemiBold"
+                     Foreground="{DynamicResource ForegroundBrushSecondary}"/>
+          <TextBlock Grid.Row="1" Grid.Column="3" Text="VOIX" Margin="16,0,0,0"
+                     VerticalAlignment="Center" FontSize="10" FontWeight="SemiBold"
+                     Foreground="{DynamicResource ForegroundBrushSecondary}"/>
+          <Border Grid.Row="0" Grid.RowSpan="7" Grid.Column="4"
+                  Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                  BorderBrush="{DynamicResource MenuFlyoutPresenterBorderBrush}"
+                  BorderThickness="1,0,0,0">
+            <StackPanel Margin="0,8" Spacing="4" HorizontalAlignment="Center">
+              <Button Classes="clear" Width="36" Height="32" Padding="0" Click="OnMenuSingers"
+                      ToolTip.Tip="{DynamicResource menu.tools.singers}">
+                <Path Width="18" Height="18" Stretch="Uniform" Fill="{DynamicResource ForegroundBrushSecondary}"
+                      Data="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
+              </Button>
+              <Button Classes="clear" Width="36" Height="32" Padding="0" Click="OnMenuPackageManager"
+                      ToolTip.Tip="{DynamicResource menu.tools.packages}">
+                <Path Width="18" Height="18" Stretch="Uniform" Fill="{DynamicResource ForegroundBrushSecondary}"
+                      Data="M12,16.54L19.37,10.8L21,12.07L12,19.07L3,12.07L4.62,10.8L12,16.54M12,14L3,7L12,0L21,7L12,14Z"/>
+              </Button>
+              <Button Classes="clear" Width="36" Height="32" Padding="0" Click="OnMenuWhatsNew"
+                      ToolTip.Tip="{DynamicResource menu.help.whatsnew}">
+                <Path Width="18" Height="18" Stretch="Uniform" Fill="{DynamicResource ForegroundBrushSecondary}"
+                      Data="M5,3C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V9L15,3H5M14,4.5L19.5,10H14V4.5Z"/>
+              </Button>
+              <Button Classes="clear" Width="36" Height="32" Padding="0" Click="OnMenuPreferences"
+                      ToolTip.Tip="{DynamicResource menu.tools.prefs}">
+                <Path Width="18" Height="18" Stretch="Uniform" Fill="{DynamicResource ForegroundBrushSecondary}"
+                      Data="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/>
+              </Button>
+            </StackPanel>
+          </Border>
+          <Border Grid.Row="1" Grid.RowSpan="6" Grid.Column="3"
+                  Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                  BorderBrush="{DynamicResource MenuFlyoutPresenterBorderBrush}"
+                  BorderThickness="1,0,0,0">
+            <StackPanel Margin="16,12,16,12" Spacing="12">
+              <StackPanel Spacing="3" IsVisible="{Binding SelectedTrack, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <Border Width="4" Height="15" CornerRadius="2" VerticalAlignment="Center"
+                          Background="{Binding SelectedTrack.TrackAccentColor}"/>
+                  <TextBlock Text="{Binding SelectedTrack.TrackName}" FontSize="13" FontWeight="SemiBold"
+                             VerticalAlignment="Center"/>
+                </StackPanel>
+                <TextBlock Text="{Binding SelectedTrack.Singer}" FontSize="11" Margin="12,0,0,0"
+                           Foreground="{DynamicResource ForegroundBrushSecondary}" TextTrimming="CharacterEllipsis"/>
+              </StackPanel>
+              <TextBlock Text="{DynamicResource panel.voice.empty}" FontSize="11" TextWrapping="Wrap"
+                         Foreground="{DynamicResource ForegroundBrushSecondary}"
+                         IsVisible="{Binding SelectedTrack, Converter={x:Static ObjectConverters.IsNull}}"/>
+              <Rectangle Height="1" Fill="{DynamicResource MenuFlyoutPresenterBorderBrush}"
+                         IsVisible="{Binding SelectedTrack, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+              <StackPanel Spacing="8" IsVisible="{Binding SelectedTrack, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <TextBlock Text="{DynamicResource panel.voice.track}" FontSize="10" FontWeight="SemiBold"
+                           Foreground="{DynamicResource ForegroundBrushSecondary}"/>
+                <UniformGrid Columns="2">
+                  <StackPanel HorizontalAlignment="Center" Spacing="2">
+                    <c:Knob Width="56" Height="56" Minimum="-24" Maximum="12" DefaultValue="0"
+                            Value="{Binding SelectedTrack.Volume, Mode=TwoWay}"
+                            CapBrush="#3A3D42" PointerBrush="{DynamicResource AccentBrush1}"
+                            TickBrush="{DynamicResource NeutralAccentBrush}" TickActiveBrush="{DynamicResource AccentBrush1}"/>
+                    <TextBlock Text="{DynamicResource panel.voice.volume}" HorizontalAlignment="Center" FontSize="11"/>
+                  </StackPanel>
+                  <StackPanel HorizontalAlignment="Center" Spacing="2">
+                    <c:Knob Width="56" Height="56" Minimum="-100" Maximum="100" DefaultValue="0"
+                            Value="{Binding SelectedTrack.Pan, Mode=TwoWay}"
+                            CapBrush="#3A3D42" PointerBrush="{DynamicResource AccentBrush1}"
+                            TickBrush="{DynamicResource NeutralAccentBrush}" TickActiveBrush="{DynamicResource AccentBrush1}"/>
+                    <TextBlock Text="{DynamicResource panel.voice.pan}" HorizontalAlignment="Center" FontSize="11"/>
+                  </StackPanel>
+                </UniformGrid>
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <ToggleButton Classes="toolbar" Width="30" Height="22" Content="M"
+                                IsChecked="{Binding SelectedTrack.Mute}" ToolTip.Tip="{DynamicResource tracks.mute}"/>
+                  <ToggleButton Classes="toolbar" Width="30" Height="22" Content="S"
+                                IsChecked="{Binding SelectedTrack.Solo}" ToolTip.Tip="{DynamicResource tracks.solo}"/>
+                </StackPanel>
+              </StackPanel>
+            </StackPanel>
+          </Border>
+
+          <Panel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" HorizontalAlignment="Stretch"
+                 VerticalAlignment="Center" Height="30" Margin="10,0,14,0">
+            <Border Classes="playback" Width="72" HorizontalAlignment="Left" Margin="4,0">
+              <Grid>
+                <TextBlock Width="28" HorizontalAlignment="Left"
+                          Background="Transparent" PointerPressed="OnEditTimeSignature">
+                  <TextBlock.Text>
+                    <MultiBinding StringFormat="{}{0}/{1}">
+                      <Binding Path="PlaybackViewModel.BeatPerBar"/>
+                      <Binding Path="PlaybackViewModel.BeatUnit"/>
+                    </MultiBinding>
+                  </TextBlock.Text>
+                </TextBlock>
+                <TextBlock Width="42" HorizontalAlignment="Right"
+                            Background="Transparent" PointerPressed="OnEditBpm" PointerWheelChanged="OnEditBpmScroll">
+                  <TextBlock.Text>
+                    <MultiBinding StringFormat="{}{0:#0.00}">
+                      <Binding Path="PlaybackViewModel.Bpm"/>
+                    </MultiBinding>
+                  </TextBlock.Text>
+                </TextBlock>
+              </Grid>
+            </Border>
+            <Border Classes="playback" HorizontalAlignment="Center">
+              <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding PlaybackViewModel.SeekStart}" Height="18">
+                  <Path Fill="{Binding $parent[Window].Foreground}" VerticalAlignment="Center" HorizontalAlignment="Center" Height="18" Width="18"
+                        Data="M5.35 4.3H7.44V13.7H5.35ZM7.44 9L12.65 4.3V13.7Z"/>
+                </Button>
+                <Button Click="OnPlayOrPause" Height="18">
+                  <Path Fill="{Binding $parent[Window].Foreground}" VerticalAlignment="Center" HorizontalAlignment="Center" Height="18" Width="18"
+                        Data="M5.35 4.3L12.65 9.01L5.35 13.7Z"/>
+                </Button>
+                <Button Command="{Binding PlaybackViewModel.Pause}" Height="18">
+                  <Path Fill="{Binding $parent[Window].Foreground}" VerticalAlignment="Center" HorizontalAlignment="Center" Height="18" Width="18"
+                        Data="M5.35 4.3H7.78V13.7H5.35ZM10.22 4.3H12.65V13.7H10.22Z"/>
+                </Button>
+                <Button Command="{Binding PlaybackViewModel.SeekEnd}" Height="18">
+                  <Path Fill="{Binding $parent[Window].Foreground}" VerticalAlignment="Center" HorizontalAlignment="Center" Height="18" Width="18"
+                        Data="M5.35 4.3L10.56 9L5.35 13.7ZM10.56 4.3H12.65V13.7H10.56Z"/>
+                </Button>
+                <ToggleButton IsChecked="{Binding PlaybackViewModel.LoopPlayback}"
+                              ToolTip.Tip="{DynamicResource tip.playback.loop}" Height="18">
+                  <Path Fill="{Binding $parent[Window].Foreground}" VerticalAlignment="Center" HorizontalAlignment="Center" Height="18" Width="18"
+                        Data="M5.19 4.86H11.11V2.8l2.53 3.09-2.53 3.1V6.93H6.05V8.99H4.35V6.93c0-1.14.34-2.07.84-2.07ZM12.81 13.13H6.88v2.07L4.35 12.1l2.53-3.1V11.06h5.08V8.99H13.65v2.07c0 1.14-.34 2.07-.84 2.07Z"/>
+                </ToggleButton>
+                <ToggleButton Classes="record" IsChecked="{Binding IsRecording}" Click="OnRecordClick" Height="18"
+                              ToolTip.Tip="{DynamicResource record.tooltip}">
+                  <Path Fill="{Binding $parent[Window].Foreground}" VerticalAlignment="Center" HorizontalAlignment="Center" Height="18" Width="18"
+                        Data="M9,5.4 A3.6,3.6 0 1,0 9,12.6 A3.6,3.6 0 1,0 9,5.4 Z"/>
+                </ToggleButton>
+                <ToggleButton IsChecked="{Binding PlaybackViewModel.Metronome}" Height="18"
+                              ToolTip.Tip="{DynamicResource prefs.playback.metronome}">
+                  <Path Fill="{Binding $parent[Window].Foreground}" VerticalAlignment="Center" HorizontalAlignment="Center" Height="18" Width="18"
+                        Data="M7.93 4.3a.43.34 0 0 0-.41.25L4.33 13.25a.43.34 0 0 0 .41.45h8.5a.43.34 0 0 0 .41-.45L12.32 9.65l-1.89 1.36c-.09.56-.7 1.02-1.42 1.02-.78 0-1.44-.54-1.44-1.18 0-.64.66-1.18 1.44-1.18.01 0 .02 0 .03 0l2.61-1.85-1.2-3.27a.43.34 0 0 0-.41-.25ZM14.65 6.13a.8.66 0 0 0-.48.16L9.13 9.92a1.17.95 0 0 0-1.17.95 1.17.95 0 0 0 1.17.95 1.17.95 0 0 0 1.16-.9l5.06-3.65a.8.66 0 0 0 .07-.92.8.66 0 0 0-.66-.22Z"/>
+                </ToggleButton>
+              </StackPanel>
+            </Border>
+            <Border Classes="playback" Width="72" HorizontalAlignment="Right" Margin="4,0">
+              <Grid>
+                <TextBlock Text="{Binding Path=PlaybackViewModel.PlayPosTime, StringFormat={}{0:mm\\:ss\\.fff}}"/>
+              </Grid>
+            </Border>
+          </Panel>
+          <ScrollBar Name="HScrollBar" Classes="music" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch"
+                    VerticalAlignment="Bottom" Height="8" ZIndex="200"
+                    Margin="0,0,0,1" Orientation="Horizontal" AllowAutoHide="False"
+                    DataContext="{Binding TracksViewModel}"
+                    Maximum="{Binding HScrollBarMax, Mode=OneWay}"
+                    Value="{Binding TickOffset}"
+                    ViewportSize="{Binding ViewportTicks}"
+                    LargeChange="{Binding ViewportTicks}"
+                    SmallChange="{Binding SmallChangeX}" PointerWheelChanged="HScrollPointerWheelChanged"/>
+          <ScrollBar Name="VScrollBar" Classes="music" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                    Margin="4,0,4,0" Orientation="Vertical" AllowAutoHide="False"
+                    DataContext="{Binding TracksViewModel}"
+                    Maximum="{Binding VScrollBarMax, Mode=OneWay}"
+                    Value="{Binding TrackOffset}"
+                    ViewportSize="{Binding ViewportTracks}"
+                    LargeChange="{Binding ViewportTracks}"
+                    SmallChange="{Binding SmallChangeY}" PointerWheelChanged="VScrollPointerWheelChanged"/>
+          <Canvas Name="TimelineCanvas" Grid.Row="1" Grid.Column="1"
+                  Height="26" VerticalAlignment="Stretch"
+                  Background="Transparent" ClipToBounds="True"
+                  PointerWheelChanged="TimelinePointerWheelChanged"
+                  PointerPressed="TimelinePointerPressed"
+                  PointerMoved="TimelinePointerMoved"
+                  PointerReleased="TimelinePointerReleased"
+                  DoubleTapped="TimelineDoubleTapped">
+            <Path Name="PlayPos"
+                  Canvas.Left="{Binding TracksViewModel.PlayPosX}"
+                  Canvas.Top="0" ZIndex="100" IsHitTestVisible="False"
+                  Fill="{DynamicResource NeutralAccentBrushSemi}"
+                  Data="M -6.5 0 L 6.5 0 L 6.5 3 L 0 9 L -6.5 3 Z"/>
+            <Canvas.ContextMenu>
+              <ContextMenu Name="TimelineContextMenu" ItemsSource="{Binding TimelineContextMenuItems}">
+                <ContextMenu.Styles>
+                  <Style Selector="MenuItem" x:DataType="vm:MenuItemViewModel">
+                    <Setter Property="Header" Value="{Binding Header}"/>
+                    <Setter Property="Command" Value="{Binding Command}"/>
+                    <Setter Property="CommandParameter" Value="{Binding CommandParameter}"/>
+                    <Setter Property="ItemsSource" Value="{Binding Items}"/>
+                  </Style>
+                </ContextMenu.Styles>
+              </ContextMenu>
+            </Canvas.ContextMenu>
+          </Canvas>
+          <c:TrackHeaderCanvas Grid.Row="2" Grid.Column="0" ClipToBounds="True" Background="Transparent"
+                              DataContext="{Binding TracksViewModel}"
+                              TrackHeight="{Binding TrackHeight}"
+                              TrackOffset="{Binding TrackOffset}"
+                              Items="{Binding Tracks}"
+                              PointerWheelChanged="MainPagePointerWheelChanged"
+                              Cursor="Arrow"/>
+          <c:TrackBackground Grid.Row="2" Grid.Column="1" Margin="0" IsHitTestVisible="False"
+                            Foreground="{DynamicResource TrackBackgroundAltBrush}"
+                            DataContext="{Binding TracksViewModel}"
+                            Bounds="{Binding Bounds, Mode=OneWayToSource}"
+                            TrackHeight="{Binding TrackHeight}"
+                            TrackOffset="{Binding TrackOffset}"/>
+          <c:TickBackground Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" Margin="0" IsHitTestVisible="False"
+                            Foreground="{DynamicResource TickLineBrush}"
+                            Background="{DynamicResource TickLineBrushLow}"
+                            Resolution="{Binding PlaybackViewModel.Resolution}"
+                            TickWidth="{Binding TracksViewModel.TickWidth}"
+                            TickOffset="{Binding TracksViewModel.TickOffset}"
+                            SnapDiv="{Binding TracksViewModel.SnapDiv}"
+                            SnapTicks="{Binding TracksViewModel.SnapTicks}"
+                            ShowBar="True"/>
+          <c:PartsCanvas x:Name="partsCanvas" Grid.Row="2" Grid.Column="1" ClipToBounds="True" Background="Transparent"
+                        DataContext="{Binding TracksViewModel}"
+                        TickWidth="{Binding TickWidth}"
+                        TrackHeight="{Binding TrackHeight}"
+                        TickOffset="{Binding TickOffset}"
+                        TrackOffset="{Binding TrackOffset}"
+                        PianoRollOpenPart="{Binding PianoRollOpenPart}"
+                        PianoRollViewTickOffset="{Binding PianoRollViewTickOffset}"
+                        PianoRollViewViewportTicks="{Binding PianoRollViewViewportTicks}"
+                        Items="{Binding Parts}"
+                        PointerPressed="PartsCanvasPointerPressed"
+                        PointerMoved="PartsCanvasPointerMoved"
+                        PointerExited="PartsCanvasPointerExited"
+                        PointerReleased="PartsCanvasPointerReleased"
+                        DoubleTapped="PartsCanvasDoubleTapped"
+                        PointerWheelChanged="MainPagePointerWheelChanged">
+            <Rectangle Name="PlayPosHighlight"
+                      Width="{Binding PlayPosHighlightWidth, Mode=OneWay}"
+                      Height="{Binding $parent.Bounds.Height, Mode=OneWay}"
+                      Canvas.Left="{Binding PlayPosHighlightX, Mode=OneWay}"
+                      Canvas.Top="0"
+                      Fill="{DynamicResource NeutralAccentBrushSemi2}"
+                      IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).PlaybackViewModel.ShowPlayPosHighlight}"
+                      IsHitTestVisible="False"/>
+            <Rectangle Name="PlayPosLine"
+                       Canvas.Left="{Binding PlayPosX}"
+                       Canvas.Top="0" Width="1"
+                       Height="{Binding $parent.Bounds.Height, Mode=OneWay}"
+                       ZIndex="99" IsHitTestVisible="False"
+                       IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).PlaybackViewModel.IsPlaying}"
+                       Fill="{DynamicResource AccentBrush2}"/>
+            <Rectangle Name="SelectionBox" StrokeThickness="2"
+                      Stroke="{DynamicResource SystemControlForegroundBaseHighBrush}"
+                      Fill="{DynamicResource TickLineBrushLow}" ZIndex="1000"
+                      IsHitTestVisible="False" IsVisible="False"/>
+            <c:PartsCanvas.ContextMenu>
+              <ContextMenu Name="PartsContextMenu"
+                          Opening="PartsContextMenuOpening"
+                          Closing="PartsContextMenuClosing"
+                          x:DataType="vm:PartsContextMenuArgs">
+                <MenuItem Header="{DynamicResource context.part.delete}"
+                          Command="{Binding PartDeleteCommand}"
+                          CommandParameter="{Binding Part}"/>
+                <MenuItem Header="{DynamicResource context.part.gotofile}"
+                          IsVisible="{Binding IsWavePart}"
+                          Command="{Binding PartGotoFileCommand}"
+                          CommandParameter="{Binding Part}"/>
+                <MenuItem Header="{DynamicResource context.part.replaceaudio}"
+                          IsVisible="{Binding IsWavePart}"
+                          Command="{Binding PartReplaceAudioCommand}"
+                          CommandParameter="{Binding Part}"/>
+                <MenuItem Header="{DynamicResource context.part.transcribe}"
+                          IsVisible="{Binding IsWavePart}"
+                          Command="{Binding PartTranscribeCommand}"
+                          CommandParameter="{Binding Part}"/>
+                <MenuItem Header="{DynamicResource context.part.rename}"
+                          IsVisible="{Binding IsVoicePart}"
+                          Command="{Binding PartRenameCommand}"
+                          CommandParameter="{Binding Part}"/>
+                <MenuItem Header="{DynamicResource context.part.merge}"
+                          IsVisible="{Binding IsVoicePart}"
+                          Command="{Binding PartMergeCommand}"
+                          CommandParameter="{Binding Part}"/>
+                <MenuItem Header="{DynamicResource context.part.split}"
+                          IsVisible="{Binding IsVoicePart}"
+                          Command="{Binding PartSplitCommand}"
+                          CommandParameter="{Binding Part}"/>
+                <MenuItem Header="{DynamicResource context.part.applypitch}"
+                          IsVisible="{Binding IsVoicePart}"
+                          ItemsSource="{Binding PartApplyPitchMenuItems}"
+                          Classes="MenuItemWithSubMenu"/>
+              </ContextMenu>
+            </c:PartsCanvas.ContextMenu>
+          </c:PartsCanvas>
+          <Border Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent"
+                  BoxShadow="inset 0 0 5 1 #3F000000" ClipToBounds="True" IsHitTestVisible="False">
+            <Border HorizontalAlignment="Center" VerticalAlignment="Center" Padding="10,5"
+                    IsVisible="{Binding TracksViewModel.PlayPosWaitingRendering}" Background="{DynamicResource BackgroundBrushSemi}">
+              <TextBlock Text="{DynamicResource progress.waitingrendering}" FontSize="15"/>
+            </Border>
+          </Border>
+          <Border Grid.Row="1" Grid.Column="2" Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0" Height="24" PointerWheelChanged="ViewScalerPointerWheelChanged">
+            <c:ViewScaler Name="VScaler" DataContext="{Binding TracksViewModel}" Value="{Binding TrackHeight}" Min="{Binding TrackHeightMin}" Max="{Binding TrackHeightMax}"/>
+          </Border>
+          <GridSplitter Grid.Row="3" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                        Background="{DynamicResource SystemControlBackgroundAltHighBrush}" Focusable="False" Cursor="SizeNorthSouth" IsVisible="{Binding ShowPianoRoll}"/>
+          <Grid Grid.Row="4" Grid.ColumnSpan="3" RowDefinitions="26,*">
+            <Border Grid.Row="0"
+                    Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                    BorderBrush="{DynamicResource MenuFlyoutPresenterBorderBrush}"
+                    BorderThickness="0,0,0,1">
+              <TextBlock Text="PIANO ROLL" Margin="14,0,0,0" VerticalAlignment="Center" FontSize="10"
+                         FontWeight="SemiBold" Foreground="{DynamicResource ForegroundBrushSecondary}"/>
+            </Border>
+            <ContentControl Grid.Row="1" Name="PianoRollContainer"/>
+          </Grid>
+          <Grid Grid.Row="5" Grid.ColumnSpan="3" Height="20" Margin="4,4,4,0" ColumnDefinitions="*,Auto">
+            <TextBlock Text="{Binding ProgressText}" VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="18" VerticalAlignment="Center">
+              <TextBlock FontSize="11" Text="{DynamicResource hint.hscroll}"
+                         Foreground="{DynamicResource ForegroundBrushSecondary}"/>
+              <TextBlock FontSize="11" Text="{DynamicResource hint.hzoom}"
+                         Foreground="{DynamicResource ForegroundBrushSecondary}"/>
+              <TextBlock FontSize="11" Text="{DynamicResource hint.vscroll}"
+                         Foreground="{DynamicResource ForegroundBrushSecondary}"/>
+              <TextBlock FontSize="11" Text="{DynamicResource hint.clear}"
+                         Foreground="{DynamicResource ForegroundBrushSecondary}"/>
+            </StackPanel>
+          </Grid>
+          <ProgressBar Grid.Row="6" Grid.ColumnSpan="3" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Value="{Binding Progress}"/>
+        </Grid>
+      </Carousel>
+    </Grid>
+  </Grid>
+</Window>

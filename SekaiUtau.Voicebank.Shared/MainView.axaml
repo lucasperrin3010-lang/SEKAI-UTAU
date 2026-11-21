@@ -1,0 +1,75 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="SekaiUtau.Voicebank.MainView">
+  <ScrollViewer>
+    <StackPanel Margin="18" Spacing="14" MaxWidth="760">
+      <StackPanel Spacing="2">
+        <TextBlock Text="SEKAI UTAU" FontSize="26" FontWeight="Bold"/>
+        <TextBlock Text="Créer une voicebank" FontSize="14" Opacity="0.75"/>
+      </StackPanel>
+
+      <Border Background="#24262A" CornerRadius="12" Padding="14">
+        <StackPanel Spacing="10">
+          <TextBlock Text="La voix" FontWeight="SemiBold"/>
+          <TextBox Name="NameBox" Watermark="Nom de la voix (obligatoire)"/>
+          <TextBox Name="AuthorBox" Watermark="Ton nom (facultatif)"/>
+          <TextBlock Text="Langue de la voix" FontSize="13" Opacity="0.85"/>
+          <ComboBox Name="LanguageBox" HorizontalAlignment="Stretch"/>
+          <TextBlock Name="LanguageHint" FontSize="11" Opacity="0.6" TextWrapping="Wrap"/>
+          <StackPanel Orientation="Horizontal" Spacing="16">
+            <RadioButton Name="BasicRadio" Content="Essentiel" GroupName="script" IsChecked="True"/>
+            <RadioButton Name="FullRadio" Content="Complet" GroupName="script"/>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <Border Background="#1F2124" CornerRadius="12" Padding="14">
+        <StackPanel Spacing="10">
+          <TextBlock Text="Enregistrement" FontWeight="SemiBold"/>
+          <Border Background="#15171A" CornerRadius="10" Padding="14">
+            <StackPanel Spacing="2" HorizontalAlignment="Center">
+              <TextBlock Name="CurrentAlias" Text="a" FontSize="34" FontWeight="Bold" HorizontalAlignment="Center"/>
+              <TextBlock Name="CurrentKana" Text="あ" FontSize="20" Opacity="0.7" HorizontalAlignment="Center"/>
+              <TextBlock Name="CurrentHint" Text="Dis la syllabe, puis appuie sur Arrêter."
+                         FontSize="12" Opacity="0.6" HorizontalAlignment="Center" TextWrapping="Wrap"/>
+            </StackPanel>
+          </Border>
+          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+            <Button Name="PrevButton" Content="◀" MinWidth="44"/>
+            <Button Name="RecordButton" Content="● Enregistrer" MinWidth="150"/>
+            <Button Name="SkipButton" Content="Passer ▶"/>
+          </StackPanel>
+          <Button Name="ClearButton" Content="Effacer la prise" HorizontalAlignment="Center"/>
+          <TextBlock Text="Touche une syllabe ci-dessous pour y aller directement."
+                     FontSize="11" Opacity="0.55" HorizontalAlignment="Center" TextWrapping="Wrap"/>
+          <TextBlock Name="ProgressText" Text="0 / 6 enregistrées" FontSize="12" Opacity="0.75"/>
+        </StackPanel>
+      </Border>
+
+      <Border Background="#1B1D20" CornerRadius="12" Padding="14">
+        <StackPanel Spacing="10">
+          <TextBlock Text="Syllabes" FontWeight="SemiBold"/>
+          <WrapPanel Name="SyllablePanel" Orientation="Horizontal"/>
+        </StackPanel>
+      </Border>
+
+      <Border Background="#1B1D20" CornerRadius="12" Padding="14">
+        <StackPanel Spacing="10">
+          <TextBlock Text="Export" FontWeight="SemiBold"/>
+          <TextBlock TextWrapping="Wrap" FontSize="12" Opacity="0.75"
+                     Text="Le ZIP contient les WAV, l'oto.ini déjà rempli avec les alias de la langue choisie, le character.txt et le character.yaml. Décompresse-le dans le dossier Singers de SEKAI UTAU sur PC."/>
+          <TextBlock Text="Points de coupe (oto.ini)" FontSize="12" Opacity="0.85"/>
+          <StackPanel Spacing="2">
+            <RadioButton Name="AutoOtoRadio" GroupName="oto" IsChecked="True"
+                         Content="Automatique : calculés sur chaque prise"/>
+            <RadioButton Name="ManualOtoRadio" GroupName="oto"
+                         Content="Manuel : je les règle dans vLabeler"/>
+          </StackPanel>
+          <TextBlock Name="OtoHint" TextWrapping="Wrap" FontSize="11" Opacity="0.6"/>
+          <Button Name="CreateZipButton" Content="Créer le ZIP" HorizontalAlignment="Left"/>
+          <TextBlock Name="ResultText" TextWrapping="Wrap" FontSize="12" IsVisible="False"/>
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

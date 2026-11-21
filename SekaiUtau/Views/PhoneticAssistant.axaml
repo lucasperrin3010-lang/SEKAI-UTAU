@@ -1,0 +1,21 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:SekaiUtau.App.ViewModels"
+        x:DataType="vm:PhoneticAssistantViewModel"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="136"
+        x:Class="SekaiUtau.App.Views.PhoneticAssistant"
+        Icon="/Assets/sekai-utau.ico"
+        Title="{DynamicResource phoneticassistant.caption}"
+        WindowStartupLocation="CenterScreen"
+        Width="400" Height="136" CanResize="False">
+  <Grid Margin="{Binding $parent[Window].WindowDecorationMargin}">
+    <StackPanel Margin="10">
+      <ComboBox HorizontalAlignment="Stretch" Margin="0,0,0,4" ItemsSource="{Binding G2ps}" SelectedItem="{Binding G2p}"/>
+      <TextBox HorizontalAlignment="Stretch" AcceptsReturn="False" AcceptsTab="False" Text="{Binding Grapheme}"/>
+      <TextBox Name="PhonemesText" HorizontalAlignment="Stretch" TextWrapping="Wrap" Height="40" IsReadOnly="True" Text="{Binding Phonemes}"></TextBox>
+      <Button HorizontalAlignment="Stretch" Content="{DynamicResource phoneticassistant.copy}" Click="OnCopy"/>
+    </StackPanel>
+  </Grid>
+</Window>

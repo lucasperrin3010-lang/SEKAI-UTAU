@@ -1,0 +1,732 @@
+﻿{
+  "entries": [
+    {
+      "version": "1.0.33",
+      "date": {
+        "fr": "20 novembre 2026",
+        "en": "November 20, 2026"
+      },
+      "title": {
+        "fr": "Enregistrement guide plus rapide.",
+        "en": "Faster guided recording."
+      },
+      "changes": {
+        "fr": [
+          "Enregistrement guide : la prise s'arrete toute seule apres un court silence, donc les syllabes s'enchainent sans toucher la souris (case Arret automatique, activee par defaut).",
+          "Boutons precedent / suivant et fleches gauche et droite pour revenir refaire une prise. La touche Passer saute maintenant a la prochaine syllabe qui n'a pas encore ete enregistree, et une barre de progression montre l'avancement.",
+          "La coupe du silence suit le bruit de fond de la prise : les consonnes douces (h, s, f) d'un micro calme ne sont plus rognees, et une piece bruyante ne laisse plus de souffle dans le WAV.",
+          "Le calcul de l'oto.ini automatique est environ quatre fois plus rapide : une banque CV complete de 71 prises passe de 575 ms a 132 ms sur la machine de developpement.",
+          "Android SEKAI UTAU Voicebank 1.2 : bouton precedent, syllabes cliquables pour aller directement a une prise, bouton Effacer la prise, et message d'erreur au lieu d'un plantage si le micro echoue a l'arret.",
+          "Nouveaux libelles : les langues qui ne les traduisent pas encore affichent l'anglais, jamais un bouton vide."
+        ],
+        "en": [
+          "Guided recording: a take now ends by itself after a short pause, so syllables are recorded in a row without touching the mouse (Stop automatically, on by default).",
+          "Previous / next buttons and left and right arrows to go back and redo a take. Skip now jumps to the next syllable that has no take yet, and a progress bar shows how far you are.",
+          "Silence trimming follows the noise floor of the take: soft consonants (h, s, f) from a quiet microphone are no longer clipped, and a noisy room no longer leaves hiss in the WAV.",
+          "The automatic oto.ini estimation is about four times faster: a full 71-take CV bank goes from 575 ms to 132 ms on the development machine.",
+          "SEKAI UTAU Voicebank 1.2 for Android: previous button, tappable syllables to jump straight to a take, a Clear take button, and an error message instead of a crash when the microphone fails to stop.",
+          "New labels: languages that do not translate them yet show English, never an empty button."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.32",
+      "date": {
+        "fr": "20 novembre 2026",
+        "en": "November 20, 2026"
+      },
+      "title": {
+        "fr": "Oto.ini automatique repare.",
+        "en": "Automatic oto.ini fixed."
+      },
+      "changes": {
+        "fr": [
+          "L'oto.ini automatique ne reconnaissait que les alias en romaji court : les syllabes ecrites avec un chiffre ou un symbole (aa, iy en anglais ; 2, 9, @, b2, kA en francais, allemand ou italien) sortaient a zero, donc la banque jouait chaque fichier entier sans coupe et tout etait decale.",
+          "Ces alias sont maintenant reconnus et mesures comme les autres, et la voyelle contre la consonne est tranchee sur le son enregistre, plus sur l'orthographe de l'alias.",
+          "Une prise impossible a mesurer (silence, fichier illisible) recoit des valeurs neutres au lieu de zeros : elle reste chantable et alignee.",
+          "L'application Android SEKAI UTAU Voicebank 1.1 et l'application de bureau utilisent le meme calcul corrige."
+        ],
+        "en": [
+          "The automatic oto.ini only recognised short romaji aliases: syllables written with a digit or a symbol (aa, iy in English; 2, 9, @, b2, kA in French, German or Italian) came out as zeroes, so the bank played every file whole with no cut and everything was out of time.",
+          "Those aliases are now recognised and measured like the others, and vowel versus consonant is decided from the recording instead of the spelling of the alias.",
+          "A take that cannot be measured (silence, unreadable file) gets neutral values instead of zeroes: it stays singable and in time.",
+          "The SEKAI UTAU Voicebank 1.1 Android app and the desktop application use the same fixed estimation."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.31",
+      "date": {
+        "fr": "20 novembre 2026",
+        "en": "November 20, 2026"
+      },
+      "title": {
+        "fr": "Voicebanks en 15 langues.",
+        "en": "Voicebanks in 15 languages."
+      },
+      "changes": {
+        "fr": [
+          "Quand on cree une voicebank, on choisit maintenant la langue : japonais, anglais, francais, espagnol, italien, allemand, portugais du Bresil, russe, coreen, mandarin, cantonais, vietnamien, turc, polonais ou filipino.",
+          "Chaque langue apporte sa liste de syllabes, essentielle ou complete, ecrite avec les symboles attendus par le phonemiseur de l'application ; l'oto.ini est genere avec les alias de cette langue.",
+          "L'application Android SEKAI UTAU Voicebank 1.1 propose le meme choix de langue et la meme liste de syllabes.",
+          "Le code de l'application voicebank est desormais partage entre Android et iOS, et un projet iOS (iPhone et iPad) est fourni pour la compiler sur Mac."
+        ],
+        "en": [
+          "When a voicebank is created, the language is now chosen: Japanese, English, French, Spanish, Italian, German, Brazilian Portuguese, Russian, Korean, Mandarin, Cantonese, Vietnamese, Turkish, Polish or Filipino.",
+          "Each language brings its own syllable list, essential or full, written with the symbols the application phonemizer expects; the oto.ini is generated with that language's aliases.",
+          "The SEKAI UTAU Voicebank 1.1 Android app offers the same language choice and the same syllable list.",
+          "The voicebank app code is now shared between Android and iOS, and an iOS project (iPhone and iPad) is provided to build it on a Mac."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.30",
+      "date": {
+        "fr": "15 novembre 2026",
+        "en": "November 15, 2026"
+      },
+      "title": {
+        "fr": "Oto.ini automatique ou manuel.",
+        "en": "Automatic or manual oto.ini."
+      },
+      "changes": {
+        "fr": [
+          "Quand on cree une voicebank, on choisit maintenant comment remplir l'oto.ini : automatique ou manuel.",
+          "Automatique : l'application analyse chaque prise (debut du son, debut de la voyelle, consonne) et ecrit un offset, une pre-utternance, une consonne et un overlap adaptes a la prise. Tout est calcule sur l'ordinateur, sans internet ni service externe.",
+          "Manuel : l'oto.ini est ecrit a zero avec les alias romaji et kana, pret a etre regle dans vLabeler, SetParam ou l'editeur d'oto de SEKAI UTAU.",
+          "L'application Android SEKAI UTAU Voicebank passe en 1.1 avec le meme choix, dans la carte Export.",
+          "Nouveau logo « S doree et note » : l'icone de l'application remplace l'ancienne sur Windows, macOS, l'installateur et l'application Android."
+        ],
+        "en": [
+          "When a voicebank is created, you now choose how the oto.ini is filled: automatic or manual.",
+          "Automatic: the application analyses each take (start of the sound, start of the vowel, consonant) and writes an offset, preutterance, consonant and overlap that fit that take. Everything is computed on the computer, with no internet or external service.",
+          "Manual: the oto.ini is written at zero with the romaji and kana aliases, ready to be tuned in vLabeler, SetParam or the oto editor of SEKAI UTAU.",
+          "The SEKAI UTAU Voicebank Android app is now 1.1 with the same choice, in the Export card.",
+          "New logo: the application icon is replaced on Windows, macOS, the installer and the Android app."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.29",
+      "date": {
+        "fr": "15 novembre 2026",
+        "en": "November 15, 2026"
+      },
+      "title": {
+        "fr": "Accueil plus propre et Echap ferme les fenetres.",
+        "en": "Cleaner welcome screen and Escape closes windows."
+      },
+      "changes": {
+        "fr": [
+          "Le bandeau de recuperation apres un plantage est maintenant lisible : le message et le chemin du projet sauvegarde s'affichent sur deux lignes, dans une carte arrondie, et un clic dessus ouvre la recuperation.",
+          "La liste des projets recents n'a plus de grand rectangle clair : elle prend le fond de l'ecran d'accueil et la ligne survolee est mise en evidence.",
+          "Echap ferme n'importe quelle fenetre de dialogue (Preferences, Creer une voix, Voix...) au lieu de laisser la fenetre ouverte.",
+          "Le menu Duo n'affiche plus l'anglais : il s'appelle desormais « Duo (en preparation) » en francais."
+        ],
+        "en": [
+          "The recovery banner shown after a crash is now readable: the message and the path of the saved project sit on two lines inside a rounded card, and clicking it opens the recovery.",
+          "The recent projects list no longer draws a big light rectangle: it uses the welcome screen background, with the hovered row highlighted.",
+          "Escape closes any dialog window (Preferences, Create a voice, Singers...) instead of leaving it open.",
+          "The Duo menu no longer shows English: it reads « Duo (en preparation) » in French."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.28",
+      "date": {
+        "fr": "15 novembre 2026",
+        "en": "November 15, 2026"
+      },
+      "title": {
+        "fr": "Le bureau reste identique, le portage telephone continue.",
+        "en": "The desktop stays the same, the phone port continues."
+      },
+      "changes": {
+        "fr": [
+          "Aucune version telephone n'est proposee au telechargement pour le moment : l'interface mobile n'etait pas encore la meme que sur PC.",
+          "Le portage vers Android est en cours : le code du bureau compile desormais pour Android, l'interface (piano roll, pistes, transport) reste a adapter.",
+          "Windows, Linux et macOS ne changent pas : ce sont les memes versions que la 1.0.27."
+        ],
+        "en": [
+          "No phone version is offered for download at the moment: the mobile interface was not the same as on PC yet.",
+          "The Android port is in progress: the desktop code now compiles for Android, the interface (piano roll, tracks, transport) still has to be adapted.",
+          "Windows, Linux and macOS do not change: they are the same as 1.0.27."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.27",
+      "date": {
+        "fr": "15 novembre 2026",
+        "en": "November 15, 2026"
+      },
+      "title": {
+        "fr": "Les deux images aussi quand on enregistre sa voix.",
+        "en": "Both pictures when recording a voice too."
+      },
+      "changes": {
+        "fr": [
+          "« Créer une voix en enregistrant » propose maintenant, comme « Créer une voix », l'icône des pistes et le portrait, avec aperçu, Choisir et Retirer.",
+          "Les deux images choisies sont enregistrées avec les WAV et l'oto.ini quand tu cliques sur Terminer.",
+          "La fenêtre s'adapte à la hauteur de l'écran et reste utilisable sur un petit écran."
+        ],
+        "en": [
+          "Create a voice by recording now offers the track icon and the portrait, with preview, Choose and Remove, just like Create a voice.",
+          "The two chosen pictures are saved together with the WAV files and the oto.ini when you click Finish.",
+          "The window fits the screen height and stays usable on a small screen."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.26",
+      "date": {
+        "fr": "15 novembre 2026",
+        "en": "November 15, 2026"
+      },
+      "title": {
+        "fr": "Deux images par voix : l'icône des pistes et le grand portrait.",
+        "en": "Two pictures per voice: the track icon and the big portrait."
+      },
+      "changes": {
+        "fr": [
+          "« Créer une voix » propose maintenant deux images : l'icône des pistes (la petite image à gauche du bloc de piste) et le portrait (la grande image derrière les notes du piano roll).",
+          "Chacune a son aperçu, son bouton Choisir et son bouton Retirer ; les deux sont facultatives.",
+          "L'icône est enregistrée en character.png et le portrait en portrait.png, déclarés dans character.txt et character.yaml.",
+          "Sur une voix existante, la fenêtre Voix propose déjà « Définir une icône » et « Définir le portrait » dans le menu du chanteur."
+        ],
+        "en": [
+          "Create a voice now offers two pictures: the track icon (the small picture left of the track block) and the portrait (the big picture behind the piano roll notes).",
+          "Each one has its own preview, Choose and Remove buttons; both are optional.",
+          "The icon is stored as character.png and the portrait as portrait.png, declared in character.txt and character.yaml.",
+          "For an existing voice, the Singers window already offers Set Icon and Set Portrait in the singer menu."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.25",
+      "date": {
+        "fr": "15 novembre 2026",
+        "en": "November 15, 2026"
+      },
+      "title": {
+        "fr": "Crée ta voix en l'enregistrant, syllabe par syllabe.",
+        "en": "Record your own voicebank, syllable by syllable."
+      },
+      "changes": {
+        "fr": [
+          "Nouvelle fenêtre Outils > « Créer une voix en enregistrant... » : elle affiche une syllabe à la fois (ka, shi, tsu...), enregistre au micro, et passe à la suivante.",
+          "Deux scripts au choix : l'essentiel (a, i, u, e, o, n) ou le CV complet (les 71 syllabes d'un vrai bank japonais).",
+          "Chaque prise est découpée automatiquement (le silence avant et après est retiré), on peut l'écouter et la refaire avant de passer à la suivante.",
+          "À la fin, SEKAI UTAU crée le dossier de la voix avec les WAV et un oto.ini déjà rempli, avec deux alias par échantillon : le romaji (ka) et le kana (か).",
+          "La voix apparaît immédiatement dans la liste des chanteurs et peut chanter tout de suite."
+        ],
+        "en": [
+          "New Tools > Create a voice by recording... window: it shows one syllable at a time (ka, shi, tsu...), records from the microphone and moves on.",
+          "Two scripts: essentials (a, i, u, e, o, n) or the full CV set (all 71 syllables of a Japanese bank).",
+          "Every take is trimmed automatically (leading and trailing silence removed) and can be listened to or redone before moving on.",
+          "When you finish, SEKAI UTAU creates the voice folder with the WAV files and a filled oto.ini, with two aliases per sample: romaji (ka) and kana (か).",
+          "The voice shows up in the singer list immediately and can sing right away."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.24",
+      "date": {
+        "fr": "15 novembre 2026",
+        "en": "November 15, 2026"
+      },
+      "title": {
+        "fr": "Le clavier du piano roll prend les couleurs que tu veux.",
+        "en": "Colour the piano roll keyboard your way."
+      },
+      "changes": {
+        "fr": [
+          "Préférences > Apparence : trois nouvelles couleurs, « Touches blanches du piano roll », « Touches noires du piano roll » et « Touche Do (repère) du piano roll ».",
+          "Les noms de notes restent lisibles automatiquement, même avec des touches très claires ou très sombres.",
+          "« Réinitialiser les couleurs » remet aussi le clavier au look piano d'origine.",
+          "Rappel : la couleur des notes (et des notes sélectionnées) se change juste au-dessus, dans la même page."
+        ],
+        "en": [
+          "Preferences > Appearance: three new colours, Piano roll white keys, Piano roll black keys and Piano roll C key marker.",
+          "Note names stay readable automatically, even with very light or very dark keys.",
+          "Reset colours also brings the keyboard back to the classic piano look.",
+          "Reminder: note and selected note colours are changed just above, on the same page."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.23",
+      "date": {
+        "fr": "14 novembre 2026",
+        "en": "November 14, 2026"
+      },
+      "title": {
+        "fr": "Enregistrement vidéo, piano roll et installateur.",
+        "en": "Video recording, piano roll and installer."
+      },
+      "changes": {
+        "fr": [
+          "Enregistrement vidéo : ffmpeg est aussi cherché à côté de SekaiUtau.exe, dans les sous-dossiers ffmpeg/Tools et dans le dossier de données, plus seulement dans le PATH ; il suffit donc de déposer ffmpeg.exe près de l'application.",
+          "Le message d'erreur indique désormais où déposer ffmpeg.exe.",
+          "Piano roll : la poignée de redimensionnement étire vraiment le piano roll (plus de grand vide noir quand on l'agrandit).",
+          "Lecture : au démarrage de la lecture, la vue se téléporte sur la tête de lecture au lieu de glisser doucement, et tout grand saut est instantané.",
+          "Nouvel installateur Windows (SEKAI-UTAU-Setup) avec choix du dossier d'installation, raccourcis, association des fichiers .sekaiu/.ustx et désinstalleur."
+        ],
+        "en": [
+          "Video recording: ffmpeg is also looked up next to SekaiUtau.exe, in ffmpeg/Tools subfolders and in the data folder, not only on PATH, so dropping ffmpeg.exe beside the app is enough.",
+          "The error message now says where to put ffmpeg.exe.",
+          "Piano roll: the resize handle really resizes the piano roll (no more big black gap when enlarging it).",
+          "Playback: starting playback teleports the view onto the playhead instead of gliding slowly, and any large jump is instant.",
+          "New Windows installer (SEKAI-UTAU-Setup) with install folder choice, shortcuts, .sekaiu/.ustx file association and an uninstaller."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.22",
+      "date": {
+        "fr": "13 novembre 2026",
+        "en": "November 13, 2026"
+      },
+      "title": {
+        "fr": "Une photo pour la voix créée.",
+        "en": "A picture for the created voice."
+      },
+      "changes": {
+        "fr": [
+          "La fenêtre « Créer une voix » accepte une photo, avec aperçu, bouton Choisir une photo et bouton Retirer.",
+          "La photo est copiée dans le dossier de la voix sous le nom character.png (ou .jpg) et déclarée dans character.txt (image=…) et character.yaml (image).",
+          "Un fichier qui n'est pas une image lisible est refusé avec un message, sans bloquer la création.",
+          "Sur une voix existante, « Définir l'image » dans la fenêtre Voix continue de fonctionner."
+        ],
+        "en": [
+          "The Create a voicebank window accepts a picture, with a preview, a Choose a picture button and a Remove button.",
+          "The picture is copied into the voice folder as character.png (or .jpg) and declared in character.txt (image=...) and character.yaml (image).",
+          "A file that is not a readable image is refused with a message, without blocking creation.",
+          "On an existing voice, Set image in the Singers window still works."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.21",
+      "date": {
+        "fr": "13 novembre 2026",
+        "en": "November 13, 2026"
+      },
+      "title": {
+        "fr": "Créer une voix depuis le menu.",
+        "en": "Create a voicebank from the menu."
+      },
+      "changes": {
+        "fr": [
+          "Nouvelle entrée Outils > Créer une voix : nom, auteur, puis création du dossier de voix dans le dossier des voix.",
+          "La voix est immédiatement disponible dans la fenêtre Voix : character.txt, character.yaml (UTF-8), oto.ini vide et un README avec les étapes d'enregistrement.",
+          "Un dossier existant portant le même nom est signalé au lieu d'être écrasé."
+        ],
+        "en": [
+          "New Tools > Create a voicebank entry: name, author, then the voice folder is created in the singers folder.",
+          "The voice is available in the Singers window right away: character.txt, character.yaml (UTF-8), an empty oto.ini and a README with the recording steps.",
+          "An existing folder with the same name is reported instead of being overwritten."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.20",
+      "date": {
+        "fr": "13 novembre 2026",
+        "en": "November 13, 2026"
+      },
+      "title": {
+        "fr": "Format de projet officiel .sekaiu, avec son icône.",
+        "en": "Official .sekaiu project format, with its own icon."
+      },
+      "changes": {
+        "fr": [
+          "Nouveau format de projet SEKAI UTAU : .sekaiu. C'est le format proposé par défaut dans Enregistrer sous, et il s'ouvre comme un projet normal.",
+          "Les fichiers .ustx restent entièrement pris en charge, à l'ouverture comme à l'enregistrement.",
+          "Icône dédiée au format .sekaiu (page sombre, note olive), livrée à côté de l'exécutable.",
+          "Script associate-sekaiu.ps1 dans l'archive Windows : il associe les .sekaiu à SEKAI UTAU pour l'utilisateur courant, sans droit administrateur."
+        ],
+        "en": [
+          "New SEKAI UTAU project format: .sekaiu. It is the default choice in Save as, and it opens like any other project.",
+          ".ustx files remain fully supported, both opening and saving.",
+          "Dedicated .sekaiu file icon (dark page, olive note), shipped next to the executable.",
+          "associate-sekaiu.ps1 script in the Windows archive: it registers .sekaiu with SEKAI UTAU for the current user, no administrator rights needed."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.19",
+      "date": {
+        "fr": "13 novembre 2026",
+        "en": "November 13, 2026"
+      },
+      "title": {
+        "fr": "Couleur des notes réglable.",
+        "en": "Note colours are now configurable."
+      },
+      "changes": {
+        "fr": [
+          "Préférences > Apparence > Couleurs : la couleur des notes et celle des notes sélectionnées s'appliquent maintenant au piano roll, en direct.",
+          "Le texte de la parole prend automatiquement une couleur claire ou sombre selon la couleur de la note.",
+          "Les notes en erreur de phonémiseur restent reconnaissables : leur couleur est assombrie."
+        ],
+        "en": [
+          "Preferences > Appearance > Colors: the note colour and the selected note colour now apply to the piano roll, live.",
+          "The lyric text switches between light and dark automatically to stay readable on the chosen colour.",
+          "Notes flagged as phonemizer errors stay recognisable: their colour is darkened."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.18",
+      "date": {
+        "fr": "13 novembre 2026",
+        "en": "November 13, 2026"
+      },
+      "title": {
+        "fr": "Notes pleines avec la parole, et ouverture automatique de la partie.",
+        "en": "Filled notes with lyrics, and the part opens automatically."
+      },
+      "changes": {
+        "fr": [
+          "Les notes du piano roll sont des blocs pleins, avec la parole écrite en sombre à l'intérieur.",
+          "À l'ouverture d'un projet, sa première partie s'affiche automatiquement dans le piano roll, et la vue se centre sur ses notes.",
+          "Le clavier vertical du piano roll est dessiné comme un vrai clavier (touches blanches, noires plus courtes, do en vert)."
+        ],
+        "en": [
+          "Piano roll notes are solid blocks with the lyric written inside in dark text.",
+          "Opening a project shows its first part in the piano roll automatically, with the view centred on its notes.",
+          "The piano roll's vertical keyboard is drawn as a real keyboard (white keys, shorter black keys, green C keys)."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.17",
+      "date": {
+        "fr": "13 novembre 2026",
+        "en": "November 13, 2026"
+      },
+      "title": {
+        "fr": "Le clavier passe à gauche du piano roll.",
+        "en": "The keyboard moves to the left of the piano roll."
+      },
+      "changes": {
+        "fr": [
+          "Le clavier horizontal du bas de la fenêtre est supprimé.",
+          "Le piano roll affiche un vrai clavier vertical sur son bord gauche : touches blanches, touches noires plus courtes, touches de do en vert.",
+          "Bandeau PIANO ROLL au-dessus du piano roll, sous l'arrangement.",
+          "Le piano roll est ouvert dès le lancement, l'arrangement reste visible au-dessus."
+        ],
+        "en": [
+          "The horizontal keyboard at the bottom of the window is gone.",
+          "The piano roll now draws a real vertical keyboard on its left edge: white keys, shorter black keys, green C keys.",
+          "A PIANO ROLL header sits above the roll, under the arrangement.",
+          "The piano roll opens at launch, with the arrangement still visible above it."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.16",
+      "date": {
+        "fr": "13 novembre 2026",
+        "en": "November 13, 2026"
+      },
+      "title": {
+        "fr": "Fenêtre réorganisée : transport en haut, panneaux Arrangement et Voix.",
+        "en": "Reorganised window: transport on top, Arrangement and Voice panels."
+      },
+      "changes": {
+        "fr": [
+          "Une seule barre de transport en haut de la fenêtre : mesure et tempo à gauche, commandes au centre, timecode à droite.",
+          "Bandeau ARRANGEMENT au-dessus des pistes et règle des mesures sur sa propre ligne.",
+          "Nouveau panneau VOIX à droite, sur toute la hauteur : piste sélectionnée, mollette de volume, mollette de panoramique, boutons M et S. Les molettes agissent vraiment sur la piste.",
+          "Rail d'icônes à l'extrême droite (chanteurs, paquets, nouveautés, préférences).",
+          "Le piano roll et le clavier s'arrêtent au bord du panneau VOIX au lieu de passer dessous."
+        ],
+        "en": [
+          "A single transport bar across the top: meter and tempo on the left, transport in the middle, timecode on the right.",
+          "ARRANGEMENT header above the tracks, with the bar ruler on its own line.",
+          "New VOICE panel on the right, full height: selected track, volume knob, pan knob, M and S buttons. The knobs really drive the track.",
+          "Icon rail on the far right (singers, packages, what's new, preferences).",
+          "The piano roll and the keyboard now stop at the edge of the VOICE panel instead of running underneath."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.15",
+      "date": {
+        "fr": "13 novembre 2026",
+        "en": "November 13, 2026"
+      },
+      "title": {
+        "fr": "Nouvelle interface : gris neutre et vert olive.",
+        "en": "New interface: neutral greys and olive green."
+      },
+      "changes": {
+        "fr": [
+          "Palette entièrement refaite : gris neutres (#1B1C1F) au lieu du violet, accent vert olive pour les notes, les blocs et les touches de do.",
+          "Les parties chantées sont vert olive et les pistes audio bleues, avec un bandeau de titre plus sombre sur chaque bloc.",
+          "Cartes de pistes arrondies avec filet et badge de couleur, barre de transport centrée sur toute la largeur avec la règle des mesures juste en dessous.",
+          "Barre de défilement horizontale descendue en bas de l'arrangement, et barre de titre Windows assombrie pour coller au reste."
+        ],
+        "en": [
+          "Brand new palette: neutral greys (#1B1C1F) instead of purple, olive green accent for notes, clips and the C keys.",
+          "Sung parts are olive green and audio parts blue, each clip carrying a darker title band.",
+          "Rounded track cards with a border and a colour badge, transport bar centred across the window with the bar ruler underneath.",
+          "Horizontal scroll bar moved to the bottom of the arrangement, and the Windows caption bar darkened to match."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.14",
+      "date": {
+        "fr": "13 novembre 2026",
+        "en": "November 13, 2026"
+      },
+      "title": {
+        "fr": "Projets VOCALOID5/6 et CeVIO AI importables.",
+        "en": "VOCALOID5/6 and CeVIO AI projects can be imported."
+      },
+      "changes": {
+        "fr": [
+          "Les projets VOCALOID5 / VOCALOID6 (.vpr) s'ouvrent : notes, paroles, tempo, mesures et noms de pistes sont récupérés (Fichier > Ouvrir ou glisser-déposer).",
+          "Les projets CeVIO AI (.ccs) et les pistes seules (.ccst) passent aussi par le glisser-déposer, qui les refusait auparavant.",
+          "Correction de l'import CeVIO : plus de piste vide fantôme et les notes arrivent sur la bonne piste.",
+          "Les messages des banques VOCALOID et CeVIO AI donnent la méthode qui marche : ouvrir le projet ici, rendre dans l'éditeur d'origine, importer le WAV en piste audio."
+        ],
+        "en": [
+          "VOCALOID5 / VOCALOID6 projects (.vpr) now open: notes, lyrics, tempo, meters and track names are read (File > Open or drag and drop).",
+          "CeVIO AI projects (.ccs) and single tracks (.ccst) are accepted by drag and drop again.",
+          "CeVIO import fixed: no more ghost empty track and the notes land on the right track.",
+          "VOCALOID and CeVIO AI voicebank messages now give the route that works: open the project here, render in the original editor, import the WAV as an audio part."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.13",
+      "date": {
+        "fr": "12 novembre 2026",
+        "en": "November 12, 2026"
+      },
+      "title": {
+        "fr": "Mode duo marqué « work in progress ».",
+        "en": "Duo mode marked as work in progress."
+      },
+      "changes": {
+        "fr": [
+          "Le menu s'appelle maintenant « Duo (work in progress) » et la fenêtre de comptes affiche un avertissement en haut : comptes locaux à ce PC, contributions échangées par fichier .ustx."
+        ],
+        "en": [
+          "The menu is now called « Duo (work in progress) » and the account window shows a notice at the top: accounts are local to this PC and contributions are exchanged as .ustx files."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.12",
+      "date": {
+        "fr": "12 novembre 2026",
+        "en": "November 12, 2026"
+      },
+      "title": {
+        "fr": "Faire de la musique à deux : comptes, pistes attribuées et contributions.",
+        "en": "Making music as a duo: accounts, owned tracks and contributions."
+      },
+      "changes": {
+        "fr": [
+          "Nouveau menu Duo : on crée un compte local (pseudo, mot de passe facultatif stocké haché en PBKDF2-SHA256) et on se connecte en un clic.",
+          "Chaque nouvelle piste retient son auteur, et Duo > M'attribuer toutes les pistes range un projet existant sous votre nom.",
+          "Duo > Exporter ma contribution écrit un .ustx qui ne contient que vos pistes ; votre partenaire l'ouvre avec Duo > Importer une contribution et les pistes s'ajoutent à son projet, chanteur et réglages compris."
+        ],
+        "en": [
+          "New Duo menu: create a local account (name, optional password stored as a PBKDF2-SHA256 hash) and sign in in one click.",
+          "Every new track remembers its author, and Duo > Assign all tracks to me files an existing project under your name.",
+          "Duo > Export my contribution writes a .ustx holding only your tracks; your partner opens it with Duo > Import a contribution and the tracks join their project, singers and settings included."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.11",
+      "date": {
+        "fr": "12 novembre 2026",
+        "en": "November 12, 2026"
+      },
+      "title": {
+        "fr": "Bibliothèques CeVIO AI détectées, avec le mode d'emploi.",
+        "en": "CeVIO AI libraries detected, with instructions."
+      },
+      "changes": {
+        "fr": [
+          "Une bibliothèque CeVIO AI ou VoiSona déposée dans le dossier des chanteurs est maintenant repérée : au lieu de l'ignorer en silence, SEKAI UTAU explique qu'elle est sous licence et chiffrée par Techno-Speech, sans format de banque externe.",
+          "Le message donne la méthode qui fonctionne : exporter le morceau en WAV et en MIDI depuis CeVIO AI, importer le WAV comme piste audio et le MIDI pour récupérer les notes dans SEKAI UTAU."
+        ],
+        "en": [
+          "A CeVIO AI or VoiSona library dropped into the singers folder is now spotted: instead of ignoring it silently, SEKAI UTAU explains that it is licensed and encrypted by Techno-Speech and has no external voicebank format.",
+          "The message gives the workflow that does work: export the song as WAV and MIDI from CeVIO AI, import the WAV as an audio track and the MIDI to get the notes back in SEKAI UTAU."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.10",
+      "date": {
+        "fr": "12 novembre 2026",
+        "en": "November 12, 2026"
+      },
+      "title": {
+        "fr": "Interface entièrement en français et accueil plus compact.",
+        "en": "Fully French interface and a more compact welcome screen."
+      },
+      "changes": {
+        "fr": [
+          "Les 333 textes qui restaient en anglais sont traduits : boutons (Appliquer, Annuler, Choisir…), commandes d'édition, dialogues, préférences, gestionnaire de paquets et messages d'erreur des banques.",
+          "L'accueil affiche Démarrer, Nouveau, Ouvrir, Récents et Modèles en français ; les nouvelles parties s'appellent « Nouvelle partie » et le sélecteur indique « Choisir un phonémiseur ».",
+          "L'accueil ne réserve plus un grand cadre vide sous les projets récents et les modèles : les listes prennent la hauteur de leur contenu.",
+          "Le fichier français couvre maintenant toutes les clés actives de l'anglais (1056 contre 822)."
+        ],
+        "en": [
+          "The 333 strings still in English are translated: buttons (Apply, Cancel, Choose…), edit commands, dialogs, preferences, package manager and voicebank error messages.",
+          "The welcome screen reads Démarrer, Nouveau, Ouvrir, Récents and Modèles in French; new parts are named « Nouvelle partie » and the selector reads « Choisir un phonémiseur ».",
+          "The welcome screen no longer reserves a large empty box under recent projects and templates: the lists take the height of their content.",
+          "The French file now covers every active English key (1056 against 822)."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.9",
+      "date": {
+        "fr": "12 novembre 2026",
+        "en": "November 12, 2026"
+      },
+      "title": {
+        "fr": "Titre de fenêtre et écran d'accueil plus propres, sans chemin personnel.",
+        "en": "Cleaner window title and welcome screen, without personal paths."
+      },
+      "changes": {
+        "fr": [
+          "Le titre de la fenêtre n'affiche plus le chemin complet du projet, seulement son nom : plus aucun nom de dossier personnel visible dans la barre de titre ou la barre des tâches.",
+          "Sur l'accueil, les projets récents montrent le nom du fichier et ses deux derniers dossiers ; le chemin complet reste disponible en infobulle.",
+          "L'accueil explique qu'il n'y a aucun projet récent ou aucun modèle au lieu d'afficher un grand cadre vide."
+        ],
+        "en": [
+          "The window title no longer shows the full project path, only its name: no personal folder name is visible in the title bar or the taskbar.",
+          "On the welcome screen, recent projects show the file name and its two deepest folders; the full path stays available in a tooltip.",
+          "The welcome screen explains that there is no recent project or template instead of showing a large empty box."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.8",
+      "date": {
+        "fr": "12 novembre 2026",
+        "en": "November 12, 2026"
+      },
+      "title": {
+        "fr": "Les banques VOCALOID déposées dans Singers sont maintenant détectées et expliquées.",
+        "en": "VOCALOID voicebanks dropped in Singers are now detected and explained."
+      },
+      "changes": {
+        "fr": [
+          "Un dossier VOCALOID placé dans Singers est reconnu : l'application indique clairement pourquoi il ne peut pas être chargé au lieu de l'ignorer.",
+          "Rappel : les données vocales VOCALOID (.ddb, .ddi, .vvd, .vvb) sont chiffrées par le fabricant ; aucun logiciel tiers ne peut les lire ni les synthétiser.",
+          "Pour utiliser une voix VOCALOID, ouvrez la banque dans l'éditeur officiel VOCALOID, puis importez le WAV obtenu dans SEKAI UTAU."
+        ],
+        "en": [
+          "A VOCALOID folder placed in Singers is now recognized: the app explains why it cannot be loaded instead of ignoring it.",
+          "Reminder: VOCALOID voice data (.ddb, .ddi, .vvd, .vvb) is encrypted by the manufacturer; no third-party software can read or synthesize it.",
+          "To use a VOCALOID voice, open the bank in the official VOCALOID editor, then import the resulting WAV into SEKAI UTAU."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.7",
+      "date": {
+        "fr": "12 novembre 2026",
+        "en": "November 12, 2026"
+      },
+      "title": {
+        "fr": "Les voicebanks DiffSinger chantent à nouveau.",
+        "en": "DiffSinger voicebanks sing again."
+      },
+      "changes": {
+        "fr": [
+          "Correction des voicebanks DiffSinger, qui affichaient « Unrecognized phoneme » et ne produisaient aucun son.",
+          "Un phonémiseur de voicebank classique (CVVC, VCV…) n'est plus réappliqué à une voicebank DiffSinger.",
+          "Le phonémiseur choisi pour une voicebank est mémorisé puis réappliqué à son ouverture, avec un contrôle de compatibilité.",
+          "Les projets et voicebanks enregistrés avec les anciens identifiants de phonémiseur sont convertis automatiquement.",
+          "Les modèles DiffSinger multilingues cherchent la syllabe dans le dictionnaire de chaque langue du modèle."
+        ],
+        "en": [
+          "Fixed DiffSinger voicebanks, which showed \"Unrecognized phoneme\" and produced no sound.",
+          "A classic voicebank phonemizer (CVVC, VCV…) is no longer reapplied to a DiffSinger voicebank.",
+          "The phonemizer chosen for a voicebank is remembered and applied again when it is loaded, after a compatibility check.",
+          "Projects and voicebanks saved with the old phonemizer ids are converted automatically.",
+          "Multilingual DiffSinger models look the syllable up in the dictionary of every language of the model."
+        ]
+      },
+      "images": []
+    },
+    {
+      "version": "1.0.6",
+      "date": {
+        "fr": "12 novembre 2026",
+        "en": "November 12, 2026"
+      },
+      "title": {
+        "fr": "Interface sombre de type DAW, notes arrondies, enregistrement vidéo, mise à jour intégrée et logo indigo transparent.",
+        "en": "Dark DAW-style interface, rounded notes, video recording, built-in updates and a transparent indigo logo."
+      },
+      "changes": {
+        "fr": [
+          "Nouveau reglage : le dossier des enregistrements (video et son) est affiche et modifiable dans Preferences, onglet Lecture, avec un bouton Choisir et un retour au dossier par defaut.",
+          "Aucune capture d'écran n'est plus livrée dans le programme : plus aucun chemin de fichier personnel n'est visible dans l'application.",
+          "Les paquets publiés ne contiennent plus vos réglages, vos projets récents ni vos sauvegardes automatiques.",
+          "Nouveau logo : anneau indigo, double croche et vagues mauves, avec un fond transparent.",
+          "Popup « Nouveautés » à chaque mise à jour, écrite dans la langue de l'application.",
+          "Mise à jour intégrée : l'application interroge GitHub, compare sa version avec celle du PC et télécharge la nouvelle.",
+          "Interface sombre charbon, notes vertes arrondies et translucides.",
+          "Clavier jouable en bas de fenêtre et vibrato réglable sur la note.",
+          "Enregistrement vidéo de la fenêtre avec le son interne.",
+          "Imports : MIDI, UST, USTX, VSQ, VSQX, SVP, CCS, MusicXML et MXL."
+        ],
+        "en": [
+          "New setting: the recording folder (video and sound) is shown and can be changed in Preferences, Playback tab, with a Choose button and a reset to the default folder.",
+          "No screenshot ships with the program anymore: no personal file path is visible anywhere in the application.",
+          "Published packages no longer contain your settings, recent projects or autosaves.",
+          "New logo: indigo ring, beamed note and mauve waves, with a transparent background.",
+          "\"What's new\" popup on every update, written in the application language.",
+          "Built-in updater: the app queries GitHub, compares its version with the one on the PC and downloads the new one.",
+          "Charcoal dark interface, rounded translucent green notes.",
+          "Playable keyboard at the bottom of the window and vibrato editable on the note.",
+          "Video recording of the window with the internal audio.",
+          "Imports: MIDI, UST, USTX, VSQ, VSQX, SVP, CCS, MusicXML and MXL."
+        ]
+      },
+      "images": []
+    }
+  ]
+}

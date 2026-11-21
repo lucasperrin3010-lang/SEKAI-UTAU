@@ -1,0 +1,217 @@
+﻿using SekaiUtau.Core.Ustx;
+using Xunit;
+
+
+namespace SekaiUtau.Core {
+    public class TimeAxisTest {
+
+        readonly ITestOutputHelper output;
+        public TimeAxisTest(ITestOutputHelper output) {
+            this.output = output;
+        }
+
+        [Fact]
+        public void ConvertMsTest() {
+            var timeAxis = new TimeAxis();
+            var project = new UProject();
+            project.timeSignatures.Add(new UTimeSignature(5, 3, 8));
+            project.timeSignatures.Add(new UTimeSignature(11, 4, 4));
+            project.tempos.Add(new UTempo(4800, 75));
+            project.tempos.Add(new UTempo(9600, 90));
+            project.tempos.Add(new UTempo(18000, 60));
+            timeAxis.BuildSegments(project);
+
+            Assert.Equal(0, timeAxis.TickPosToMsPos(0));
+            Assert.Equal(2500, timeAxis.TickPosToMsPos(2400), 6);
+            Assert.Equal(5000, timeAxis.TickPosToMsPos(4800), 6);
+            Assert.Equal(9000, timeAxis.TickPosToMsPos(7200), 6);
+            Assert.Equal(21833.33333333, timeAxis.TickPosToMsPos(15960), 6);
+            Assert.Equal(37166.66666667, timeAxis.TickPosToMsPos(24000), 6);
+
+            Assert.Equal(0, timeAxis.MsPosToTickPos(0));
+            Assert.Equal(2400, timeAxis.MsPosToTickPos(2500));
+            Assert.Equal(4800, timeAxis.MsPosToTickPos(5000));
+            Assert.Equal(7200, timeAxis.MsPosToTickPos(9000));
+            Assert.Equal(15960, timeAxis.MsPosToTickPos(21833.33333333));
+            Assert.Equal(24000, timeAxis.MsPosToTickPos(37166.66666667));
+        }
+
+        [Fact]
+        public void ConvertBarBeatTest() {
+            var timeAxis = new TimeAxis();
+            var project = new UProject();
+            project.timeSignatures.Add(new UTimeSignature(5, 3, 8));
+            project.timeSignatures.Add(new UTimeSignature(11, 4, 4));
+            project.tempos.Add(new UTempo(4800, 75));
+            project.tempos.Add(new UTempo(9600, 90));
+            project.tempos.Add(new UTempo(18000, 60));
+            timeAxis.BuildSegments(project);
+
+            Assert.Equal(0, timeAxis.BarBeatToTickPos(0, 0));
+            Assert.Equal(1440, timeAxis.BarBeatToTickPos(0, 3));
+            Assert.Equal(4800, timeAxis.BarBeatToTickPos(2, 2));
+            Assert.Equal(9600, timeAxis.BarBeatToTickPos(5, 0));
+            Assert.Equal(13920, timeAxis.BarBeatToTickPos(11, 0));
+            Assert.Equal(17760, timeAxis.BarBeatToTickPos(13, 0));
+            Assert.Equal(18240, timeAxis.BarBeatToTickPos(13, 1));
+
+            int bar;
+            int beat;
+            int remainingTicks;
+            timeAxis.TickPosToBarBeat(0, out bar, out beat, out remainingTicks);
+            Assert.Equal(0, bar);
+            Assert.Equal(0, beat);
+            Assert.Equal(0, remainingTicks);
+            timeAxis.TickPosToBarBeat(1440, out bar, out beat, out remainingTicks);
+            Assert.Equal(0, bar);
+            Assert.Equal(3, beat);
+            Assert.Equal(0, remainingTicks);
+            timeAxis.TickPosToBarBeat(1450, out bar, out beat, out remainingTicks);
+            Assert.Equal(0, bar);
+            Assert.Equal(3, beat);
+            Assert.Equal(10, remainingTicks);
+            timeAxis.TickPosToBarBeat(4800, out bar, out beat, out remainingTicks);
+            Assert.Equal(2, bar);
+            Assert.Equal(2, beat);
+            Assert.Equal(0, remainingTicks);
+            timeAxis.TickPosToBarBeat(9600, out bar, out beat, out remainingTicks);
+            Assert.Equal(5, bar);
+            Assert.Equal(0, beat);
+            Assert.Equal(0, remainingTicks);
+            timeAxis.TickPosToBarBeat(13920, out bar, out beat, out remainingTicks);
+            Assert.Equal(11, bar);
+            Assert.Equal(0, beat);
+            Assert.Equal(0, remainingTicks);
+            timeAxis.TickPosToBarBeat(14000, out bar, out beat, out remainingTicks);
+            Assert.Equal(11, bar);
+            Assert.Equal(0, beat);
+            Assert.Equal(80, remainingTicks);
+            timeAxis.TickPosToBarBeat(17760, out bar, out beat, out remainingTicks);
+            Assert.Equal(13, bar);
+            Assert.Equal(0, beat);
+            Assert.Equal(0, remainingTicks);
+            timeAxis.TickPosToBarBeat(18000, out bar, out beat, out remainingTicks);
+            Assert.Equal(13, bar);
+            Assert.Equal(0, beat);
+            Assert.Equal(240, remainingTicks);
+            timeAxis.TickPosToBarBeat(18200, out bar, out beat, out remainingTicks);
+            Assert.Equal(13, bar);
+            Assert.Equal(0, beat);
+            Assert.Equal(440, remainingTicks);
+        }
+
+        [Theory]
+        [InlineData(0.0)]
+        [InlineData(-120.0)]
+        [InlineData(double.NaN)]
+        [InlineData(double.PositiveInfinity)]
+        public void InvalidFirstTempoTest(double bpm) {
+            var timeAxis = new TimeAxis();
+            var project = new UProject();
+            project.tempos[0].bpm = bpm;
+            timeAxis.BuildSegments(project);
+
+            // Falls back to the default tempo instead of producing NaN or infinity.
+            Assert.Equal(120, timeAxis.GetBpmAtTick(0));
+            Assert.Equal(500, timeAxis.TickPosToMsPos(480), 6);
+            Assert.Equal(480, timeAxis.MsPosToTickPos(500));
+        }
+
+        [Theory]
+        [InlineData(0.0)]
+        [InlineData(double.NaN)]
+        [InlineData(double.PositiveInfinity)]
+        public void InvalidLaterTempoTest(double bpm) {
+            var timeAxis = new TimeAxis();
+            var project = new UProject();
+            project.tempos.Add(new UTempo(4800, bpm));
+            timeAxis.BuildSegments(project);
+
+            // An unusable tempo inherits the previous one. Without this, msPos of
+            // every following segment becomes NaN or infinity, and any ms value
+            // derived from it kills the render thread on lookup.
+            Assert.Equal(120, timeAxis.GetBpmAtTick(4800));
+            Assert.Equal(10000, timeAxis.TickPosToMsPos(9600), 6);
+            Assert.Equal(9600, timeAxis.MsPosToTickPos(10000));
+        }
+
+        [Fact]
+        public void NoTemposTest() {
+            var timeAxis = new TimeAxis();
+            var project = new UProject();
+            project.tempos.Clear();
+            timeAxis.BuildSegments(project);
+
+            Assert.Equal(120, timeAxis.GetBpmAtTick(0));
+            Assert.Equal(500, timeAxis.TickPosToMsPos(480), 6);
+        }
+
+        [Fact]
+        public void NoTimeSignaturesTest() {
+            var timeAxis = new TimeAxis();
+            var project = new UProject();
+            project.timeSignatures.Clear();
+            timeAxis.BuildSegments(project);
+
+            Assert.Equal(120, timeAxis.GetBpmAtTick(0));
+            Assert.Equal(1920, timeAxis.BarBeatToTickPos(1, 0));
+            timeAxis.TickPosToBarBeat(1920, out int bar, out int beat, out int remainingTicks);
+            Assert.Equal(1, bar);
+            Assert.Equal(0, beat);
+            Assert.Equal(0, remainingTicks);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(4)]
+        [InlineData(-1)]
+        public void InvalidBeatUnitTest(int beatUnit) {
+            var timeAxis = new TimeAxis();
+            var project = new UProject();
+            project.timeSignatures[0].beatUnit = beatUnit;
+            timeAxis.BuildSegments(project);
+
+            // A non-positive beat unit used to divide by zero while building.
+            Assert.Equal(1920, timeAxis.BarBeatToTickPos(1, 0));
+        }
+
+        [Theory]
+        [InlineData(double.NaN)]
+        [InlineData(double.PositiveInfinity)]
+        [InlineData(double.NegativeInfinity)]
+        public void NonFiniteLookupTest(double value) {
+            var timeAxis = new TimeAxis();
+            var project = new UProject();
+            timeAxis.BuildSegments(project);
+
+            // Callers on the render thread pass values derived from phoneme
+            // envelopes, which can go non-finite. These must not throw.
+            var tickPos = timeAxis.MsPosToTickPos(value);
+            Assert.InRange(tickPos, int.MinValue, int.MaxValue);
+            timeAxis.MsPosToNonExactTickPos(value);
+            timeAxis.TickPosToMsPos(value);
+        }
+
+        [Fact]
+        public void TemposBetweenTicksBeforeFirstSegmentTest() {
+            var timeAxis = new TimeAxis();
+            var project = new UProject();
+            timeAxis.BuildSegments(project);
+
+            var tempos = timeAxis.TemposBetweenTicks(-10, 0);
+            Assert.Single(tempos);
+            Assert.Equal(-10, tempos[0].position);
+            Assert.Equal(120, tempos[0].bpm);
+
+            tempos = timeAxis.TemposBetweenTicks(-100, -50);
+            Assert.Single(tempos);
+            Assert.Equal(-100, tempos[0].position);
+            Assert.Equal(120, tempos[0].bpm);
+
+            tempos = timeAxis.TemposBetweenTicks(-10, 5);
+            Assert.Single(tempos);
+            Assert.Equal(0, tempos[0].position);
+            Assert.Equal(120, tempos[0].bpm);
+        }
+    }
+}

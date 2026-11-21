@@ -1,0 +1,736 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using SekaiUtau.Audio;
+using SekaiUtau.Classic;
+using SekaiUtau.Core;
+using SekaiUtau.Core.Render;
+using SekaiUtau.Core.Util;
+using ReactiveUI;
+using ReactiveUI.Primitives;
+using ReactiveUI.Primitives.Concurrency;
+using ReactiveUI.SourceGenerators;
+using Serilog;
+
+namespace SekaiUtau.App.ViewModels {
+    public class LyricsHelperOption {
+        public readonly Type klass;
+        public LyricsHelperOption(Type klass) {
+            this.klass = klass;
+        }
+        public override string ToString() {
+            return klass.Name;
+        }
+    }
+
+    public partial class PreferencesViewModel : ViewModelBase {
+        // General
+        private CultureInfo? language;
+        private CultureInfo? sortingOrder;
+
+        public List<CultureInfo>? Languages { get; }
+        public CultureInfo? Language {
+            get => language;
+            set => this.RaiseAndSetIfChanged(ref language, value);
+        }
+        public List<CultureInfo>? SortingOrders { get; }
+        public CultureInfo? SortingOrder {
+            get => sortingOrder;
+            set => this.RaiseAndSetIfChanged(ref sortingOrder, value);
+        }
+        // Release channel index: 0 = stable, 1 = beta, 2 = alpha.
+        [Reactive] public partial int Channel { get; set; }
+        [Reactive] public partial bool PlaySineWhenNoSinger { get; set; }
+
+        // Playback
+        private List<AudioOutputDevice>? audioOutputDevices;
+        private AudioOutputDevice? audioOutputDevice;
+
+        public List<AudioOutputDevice>? AudioOutputDevices {
+            get => audioOutputDevices;
+            set => this.RaiseAndSetIfChanged(ref audioOutputDevices, value);
+        }
+        public AudioOutputDevice? AudioOutputDevice {
+            get => audioOutputDevice;
+            set => this.RaiseAndSetIfChanged(ref audioOutputDevice, value);
+        }
+        [Reactive] public partial bool UseSystemDefaultDevice { get; set; }
+        [Reactive] public partial int PreferPortAudio { get; set; }
+        [Reactive] public partial uint AudioBackEnd { get; set; }
+        [Reactive] public partial int LockStartTime { get; set; }
+        [Reactive] public partial int PlaybackAutoScroll { get; set; }
+        [Reactive] public partial bool PlaybackFollowPitch { get; set; }
+        [Reactive] public partial bool PlaybackSmoothScroll { get; set; }
+        [Reactive] public partial double PlaybackScrollCursorPosition { get; set; }
+        [Reactive] public partial double RecordingAudioOffsetMs { get; set; }
+        // Folder shown in Preferences > Playback; the recording files are written there.
+        [Reactive] public partial string RecordingOutputFolder { get; set; }
+
+        // Wallpaper
+        [Reactive] public partial string? WallpaperPath { get; set; }
+        [Reactive] public partial double WallpaperOpacity { get; set; }
+
+        /// <summary>Stores the recording folder; an empty value restores the default one.</summary>
+        public void SetRecordingOutputFolder(string path) {
+            bool useDefault = string.IsNullOrWhiteSpace(path);
+            RecordingOutputFolder = useDefault
+                ? SekaiUtau.Core.Recording.RecordingPaths.DefaultDirectory
+                : path;
+            Preferences.Default.RecordingOutputDirectory = useDefault ? string.Empty : path;
+            Preferences.Save();
+        }
+
+        public void SetWallpaperPath(string path) {
+            WallpaperPath = path;
+            Preferences.Default.WallpaperPath = path;
+            Preferences.Save();
+            MessageBus.Current.SendMessage(new WallpaperChangedEvent());
+        }
+
+        public void ClearWallpaper() {
+            SetWallpaperPath(string.Empty);
+        }
+        [Reactive] public partial double PlayPosMarkerMargin { get; set; }
+        [Reactive] public partial int MetronomeVolume { get; set; }
+        [Reactive] public partial int MetronomeHighFrequency { get; set; }
+        [Reactive] public partial int MetronomeLowFrequency { get; set; }
+
+        // Paths
+        public string SingerPath => PathManager.Inst.SingersPath;
+        public string AdditionalSingersPath => PathManager.Inst.AdditionalSingersPath;
+        [Reactive] public partial bool InstallToAdditionalSingersPath { get; set; }
+        [Reactive] public partial bool LoadDeepFolders { get; set; }
+
+        // Editing
+        public List<LyricsHelperOption> LyricsHelpers { get; } =
+            ActiveLyricsHelper.Inst.Available
+                .Select(klass => new LyricsHelperOption(klass))
+                .ToList();
+        [Reactive] public partial LyricsHelperOption? LyricsHelper { get; set; }
+        [Reactive] public partial bool LyricsHelperBrackets { get; set; }
+        [Reactive] public partial bool PenPlusDefault { get; set; }
+        [Reactive] public partial bool RenderStatusInTrackBar { get; set; }
+
+        // Render
+        [Reactive] public partial bool PreRender { get; set; }
+        [Reactive] public partial int NumRenderThreads { get; set; }
+        public int LogicalCoreCount {
+            get => Environment.ProcessorCount;
+        }
+        public bool HighThreads => highThreads.Value;
+        public int SafeMaxThreadCount {
+            get => Math.Min(8, LogicalCoreCount / 2);
+        }
+        [Reactive] public partial bool SkipRenderingMutedTracks { get; set; }
+        [Reactive] public partial bool ClearCacheOnQuit { get; set; }
+        public List<string> OnnxRunnerOptions { get; set; }
+        [Reactive] public partial string OnnxRunner { get; set; }
+        public List<GpuInfo> OnnxGpuOptions { get; set; }
+        [Reactive] public partial GpuInfo OnnxGpu { get; set; }
+        public bool ShowOnnxGpu => showOnnxGpu.Value;
+
+        public List<string> MergePhrasesSecs { get; } = new List<string> { "Auto", "2.5", "5", "7.5", "10" };
+        [Reactive] public partial int MergePhrasesSecIndex { get; set; }
+
+        // GAME backend (onnx / ggml)
+        public List<string> GameBackendOptions { get; } = new() { "ONNX", "GGML" };
+        [Reactive] public partial string GameBackend { get; set; }
+
+        // Appearance
+        [Reactive] public partial string ThemeName { get; set; }
+        [Reactive] public partial string UiFontPath { get; set; }
+        [Reactive] public partial string UiFontFamily { get; set; }
+        [Reactive] public partial bool UseUiFontForNotes { get; set; }
+        public List<string>  UiFontFamilies { get; private set; } = new();
+        [Reactive] public partial int DegreeStyle { get; set; }
+        [Reactive] public partial bool UseTrackColor { get; set; }
+        [Reactive] public partial bool ShowPortrait { get; set; }
+        [Reactive] public partial bool ShowIcon { get; set; }
+        [Reactive] public partial bool ShowGhostNotes { get; set; }
+        [Reactive] public partial bool NoteHoverGlow { get; set; }
+        [Reactive] public partial bool ReduceAnimations { get; set; }
+        [Reactive] public partial bool ShowPlaybackNoteHighlight { get; set; }
+        [Reactive] public partial bool ShowPlaybackNoteBounce { get; set; }
+        [Reactive] public partial bool DetachPianoRoll { get; set; }
+        public bool ThemeEditable => themeEditable.Value;
+        public List<string> ThemeItems => ThemeManager.GetAvailableThemes();
+        public bool IsThemeEditorOpen => Views.ThemeEditorWindow.IsOpen;
+
+        // Interface colours, editable with the picker or with a hex code.
+        public System.Collections.ObjectModel.ObservableCollection<UiColorOptionViewModel> UiColorOptions { get; } = new();
+
+        // UTAU
+        public List<string> DefaultRendererOptions { get; set; }
+        [Reactive] public partial string DefaultRenderer { get; set; }
+        [Reactive] public partial int OtoEditor { get; set; }
+        public string VLabelerPath => Preferences.Default.VLabelerPath;
+        public string SetParamPath => Preferences.Default.SetParamPath;
+
+        // Diffsinger
+        public List<int> DiffSingerStepsOptions { get; } = new List<int> { 2, 5, 10, 20, 50, 100, 200, 500, 1000 };
+        public List<int> DiffSingerStepsVarianceOptions { get; } = new List<int> { 2, 5, 10, 20, 50, 100, 200, 500, 1000 };
+        public List<int> DiffSingerStepsPitchOptions { get; } = new List<int> { 2, 5, 10, 20, 50, 100, 200, 500, 1000 };
+        [Reactive] public partial int DiffSingerSteps { get; set; }
+        [Reactive] public partial int DiffSingerStepsVariance { get; set; }
+        [Reactive] public partial int DiffSingerStepsPitch { get; set; }
+        [Reactive] public partial double DiffSingerDepth { get; set; }
+        [Reactive] public partial bool DiffSingerTensorCache { get; set; }
+        [Reactive] public partial bool DiffSingerVarianceLocalPitchPatch { get; set; }
+        [Reactive] public partial bool DiffSingerLangCodeHide { get; set; }
+
+        // Advanced
+        [Reactive] public partial bool RememberMid { get; set; }
+        [Reactive] public partial bool RememberUst { get; set; }
+        [Reactive] public partial bool RememberVsqx { get; set; }
+        [Reactive] public partial bool Wayland { get; set; }
+        public string WinePath => Preferences.Default.WinePath;
+        [Reactive] public partial bool DefaultSnapCurve { get; set; }
+
+        private readonly ObservableAsPropertyHelper<bool> highThreads;
+        private readonly ObservableAsPropertyHelper<bool> showOnnxGpu;
+        private readonly ObservableAsPropertyHelper<bool> themeEditable;
+
+        // WhenAnyValue emits the current value immediately on subscribe, not just on
+        // change. For preferences that just need to persist changes to disk, that
+        // means every subscription below would call Preferences.Save() once during
+        // construction with the value that was just loaded from disk - Skip(1) drops
+        // that redundant initial emission and keeps only real changes.
+        void PersistOn<T>(IObservable<T> source, Action<T> assign) where T : notnull {
+            source.Skip(1).Subscribe(v => {
+                assign(v);
+                Preferences.Save();
+            });
+        }
+
+        // Colours are saved and pushed to the application resources so they show up immediately.
+        UiColorOptionViewModel NewUiColor(string nameKey, Avalonia.Media.Color color, Func<Avalonia.Media.Color> themeColor, Action<string> assign) {
+            return new UiColorOptionViewModel(ThemeManager.GetString(nameKey), color, themeColor, hex => {
+                assign(hex);
+                Preferences.Save();
+                UiColors.ApplyFromPreferences();
+            });
+        }
+
+        /// <summary>
+        /// Path of the theme file the editor can write to. The built-in Light and Dark themes are
+        /// not files, so a user theme is cloned from the current colours instead of refusing to edit.
+        /// </summary>
+        public string? EnsureEditableThemePath() {
+            try {
+                if (Colors.CustomTheme.Themes.TryGetValue(ThemeName, out var existing) &&
+                    !Colors.CustomTheme.IsPackageTheme(ThemeName)) {
+                    return existing;
+                }
+                string themesPath = SekaiUtau.Core.PathManager.Inst.ThemesPath;
+                System.IO.Directory.CreateDirectory(themesPath);
+                string path = System.IO.Path.Combine(themesPath, $"seka-utau-{DateTime.Now:yyyyMMdd-HHmmss}.yaml");
+                var yaml = Colors.CustomTheme.Default;
+                yaml.Name = "SEKAI UTAU perso";
+                System.IO.File.WriteAllText(path, SekaiUtau.Core.Yaml.DefaultSerializer.Serialize(yaml), System.Text.Encoding.UTF8);
+                RefreshThemes();
+                var displayName = Colors.CustomTheme.Themes
+                    .Where(kv => kv.Value == path)
+                    .Select(kv => kv.Key)
+                    .FirstOrDefault();
+                if (!string.IsNullOrEmpty(displayName)) {
+                    ThemeName = displayName;
+                    Preferences.Default.ThemeName = displayName;
+                    Preferences.Save();
+                }
+                Log.Information($"Created editable theme: {path}");
+                return path;
+            } catch (Exception e) {
+                Log.Error(e, "Failed to prepare an editable theme");
+                return null;
+            }
+        }
+
+        /// <summary>Drops every override and returns to the colours of the selected theme.</summary>
+        public void ResetUiColors() {
+            Preferences.Default.UiBackgroundColor = "";
+            Preferences.Default.UiPanelColor = "";
+            Preferences.Default.UiTextColor = "";
+            Preferences.Default.UiBorderColor = "";
+            Preferences.Default.UiNoteColor = "";
+            Preferences.Default.UiSelectedNoteColor = "";
+            Preferences.Default.UiGridColor = "";
+            Preferences.Default.UiPianoWhiteKeyColor = "";
+            Preferences.Default.UiPianoBlackKeyColor = "";
+            Preferences.Default.UiPianoCenterKeyColor = "";
+            Preferences.Save();
+            // Reloading the theme restores the resources that the overrides had replaced.
+            App.SetTheme();
+            foreach (var option in UiColorOptions) {
+                option.Reset();
+            }
+        }
+
+        public PreferencesViewModel() {
+            var audioOutput = PlaybackManager.Inst.AudioOutput;
+            if (audioOutput != null) {
+                AudioOutputDevices = audioOutput.GetOutputDevices();
+                int deviceNumber = audioOutput.DeviceNumber;
+                var device = AudioOutputDevices.FirstOrDefault(d => d.deviceNumber == deviceNumber);
+                if (device != null) {
+                    AudioOutputDevice = device;
+                }
+            }
+            UseSystemDefaultDevice = Preferences.Default.UseSystemDefaultAudioDevice;
+            AudioBackEnd = Preferences.Default.AudioBackEnd;
+            PlaybackAutoScroll = Preferences.Default.PlaybackAutoScroll;
+            PlaybackFollowPitch = Preferences.Default.PlaybackFollowPitch;
+            PlaybackSmoothScroll = Preferences.Default.PlaybackSmoothScroll;
+            PlaybackScrollCursorPosition = Preferences.Default.PlaybackScrollCursorPosition;
+            RecordingAudioOffsetMs = Preferences.Default.RecordingAudioOffsetMs;
+            RecordingOutputFolder = SekaiUtau.Core.Recording.RecordingPaths.OutputDirectory;
+            WallpaperPath = Preferences.Default.WallpaperPath;
+            WallpaperOpacity = Preferences.Default.WallpaperOpacity;
+            PlayPosMarkerMargin = Preferences.Default.PlayPosMarkerMargin;
+            MetronomeVolume = Preferences.Default.MetronomeVolume;
+            MetronomeHighFrequency = Preferences.Default.MetronomeHighFrequency;
+            MetronomeLowFrequency = Preferences.Default.MetronomeLowFrequency;
+            LockStartTime = Preferences.Default.LockStartTime;
+            InstallToAdditionalSingersPath = Preferences.Default.InstallToAdditionalSingersPath;
+            LoadDeepFolders = Preferences.Default.LoadDeepFolderSinger;
+            ToolsManager.Inst.Initialize();
+            var pattern = new Regex(@"Strings\.([\w-]+)\.axaml");
+            Languages = App.GetLanguages().Keys
+                .Select(lang => CultureInfo.GetCultureInfo(lang))
+                .ToList();
+            Language = string.IsNullOrEmpty(Preferences.Default.Language)
+                ? null
+                : CultureInfo.GetCultureInfo(Preferences.Default.Language);
+            SortingOrders = Languages.ToList();
+            SortingOrders.Insert(0, CultureInfo.InvariantCulture);
+            SortingOrder = Preferences.Default.SortingOrder == null ? Language
+                : string.IsNullOrEmpty(Preferences.Default.SortingOrder) ? CultureInfo.InvariantCulture
+                : CultureInfo.GetCultureInfo(Preferences.Default.SortingOrder);
+            PreRender = Preferences.Default.PreRender;
+            DefaultRendererOptions = Renderers.getRendererOptions();
+            DefaultRenderer = String.IsNullOrEmpty(Preferences.Default.DefaultRenderer) ?
+               DefaultRendererOptions[0] : Preferences.Default.DefaultRenderer;
+            NumRenderThreads = Preferences.Default.NumRenderThreads;
+            OnnxRunnerOptions = Onnx.getRunnerOptions();
+            OnnxRunner = String.IsNullOrEmpty(Preferences.Default.OnnxRunner) ?
+               OnnxRunnerOptions[0] : Preferences.Default.OnnxRunner;
+            OnnxGpuOptions = Onnx.getGpuInfo();
+            OnnxGpu = OnnxGpuOptions.Count > 0
+                ? OnnxGpuOptions.FirstOrDefault(x => x.deviceId == Preferences.Default.OnnxGpu, OnnxGpuOptions[0])
+                : new GpuInfo();
+            MergePhrasesSecIndex = Math.Max(0, MergePhrasesSecs.IndexOf(
+                Preferences.Default.MergePhrasesSec == 0
+                    ? "Auto"
+                    : Preferences.Default.MergePhrasesSec.ToString()));
+            // GAME backend: ONNX is the default, GGML is available when installed.
+            // The options list always includes both so the ComboBox UX is stable.
+            GameBackend = Preferences.Default.GameBackend switch {
+                "ggml" => "GGML",
+                _ => "ONNX",  // default / empty / unrecognized all map to ONNX
+            };
+            DiffSingerDepth = Preferences.Default.DiffSingerDepth * 100;
+            DiffSingerSteps = Preferences.Default.DiffSingerSteps;
+            DiffSingerStepsVariance = Preferences.Default.DiffSingerStepsVariance;
+            DiffSingerStepsPitch = Preferences.Default.DiffSingerStepsPitch;
+            DiffSingerTensorCache = Preferences.Default.DiffSingerTensorCache;
+            DiffSingerVarianceLocalPitchPatch = Preferences.Default.DiffSingerVarianceLocalPitchPatch;
+            DiffSingerLangCodeHide = Preferences.Default.DiffSingerLangCodeHide;
+            SkipRenderingMutedTracks = Preferences.Default.SkipRenderingMutedTracks;
+            ThemeName = Preferences.Default.ThemeName;
+            UiFontPath = Preferences.Default.UiFontPath;
+            UiFontFamily = Preferences.Default.UiFontFamily;
+            UseUiFontForNotes = Preferences.Default.UseUiFontForNotes;
+            RefreshUiFontFamilies();
+            UiColorOptions.Add(NewUiColor("prefs.appearance.colors.background", UiColors.Background, () => UiColors.Background, v => Preferences.Default.UiBackgroundColor = v));
+            UiColorOptions.Add(NewUiColor("prefs.appearance.colors.panel", UiColors.Panel, () => UiColors.Panel, v => Preferences.Default.UiPanelColor = v));
+            UiColorOptions.Add(NewUiColor("prefs.appearance.colors.text", UiColors.Text, () => UiColors.Text, v => Preferences.Default.UiTextColor = v));
+            UiColorOptions.Add(NewUiColor("prefs.appearance.colors.border", UiColors.Border, () => UiColors.Border, v => Preferences.Default.UiBorderColor = v));
+            UiColorOptions.Add(NewUiColor("prefs.appearance.colors.note", UiColors.Note, () => UiColors.Note, v => Preferences.Default.UiNoteColor = v));
+            UiColorOptions.Add(NewUiColor("prefs.appearance.colors.selectednote", UiColors.SelectedNote, () => UiColors.SelectedNote, v => Preferences.Default.UiSelectedNoteColor = v));
+            UiColorOptions.Add(NewUiColor("prefs.appearance.colors.grid", UiColors.Grid, () => UiColors.Grid, v => Preferences.Default.UiGridColor = v));
+            UiColorOptions.Add(NewUiColor("prefs.appearance.colors.pianowhitekey", UiColors.PianoWhiteKey, () => UiColors.PianoWhiteKey, v => Preferences.Default.UiPianoWhiteKeyColor = v));
+            UiColorOptions.Add(NewUiColor("prefs.appearance.colors.pianoblackkey", UiColors.PianoBlackKey, () => UiColors.PianoBlackKey, v => Preferences.Default.UiPianoBlackKeyColor = v));
+            UiColorOptions.Add(NewUiColor("prefs.appearance.colors.pianocenterkey", UiColors.PianoCenterKey, () => UiColors.PianoCenterKey, v => Preferences.Default.UiPianoCenterKeyColor = v));
+            DegreeStyle = Preferences.Default.DegreeStyle;
+            UseTrackColor = Preferences.Default.UseTrackColor;
+            ShowPortrait = Preferences.Default.ShowPortrait;
+            ShowIcon = Preferences.Default.ShowIcon;
+            ShowGhostNotes = Preferences.Default.ShowGhostNotes;
+            NoteHoverGlow = Preferences.Default.NoteHoverGlow;
+            ReduceAnimations = Preferences.Default.ReduceAnimations;
+            ShowPlaybackNoteHighlight = Preferences.Default.ShowPlaybackNoteHighlight;
+            ShowPlaybackNoteBounce = Preferences.Default.ShowPlaybackNoteBounce;
+            DetachPianoRoll = Preferences.Default.DetachPianoRoll;
+            Channel = Preferences.Default.Channel switch {
+                "beta" => 1,
+                "alpha" => 2,
+                _ => 0
+            };
+            PlaySineWhenNoSinger = Preferences.Default.PlaySineWhenNoSinger;
+            LyricsHelper = LyricsHelpers.FirstOrDefault(option => option.klass.Equals(ActiveLyricsHelper.Inst.GetPreferred()));
+            LyricsHelperBrackets = Preferences.Default.LyricsHelperBrackets;
+            RenderStatusInTrackBar = Preferences.Default.RenderStatusInTrackBar;
+            OtoEditor = Preferences.Default.OtoEditor;
+            RememberMid = Preferences.Default.RememberMid;
+            RememberUst = Preferences.Default.RememberUst;
+            RememberVsqx = Preferences.Default.RememberVsqx;
+            DefaultSnapCurve = Preferences.Default.DefaultSnapCurve;
+            ClearCacheOnQuit = Preferences.Default.ClearCacheOnQuit;
+            Wayland = Preferences.Default.UseWayland;
+
+            MessageBus.Current.Listen<ThemeEditorStateChangedEvent>()
+                .Subscribe(_ => this.RaisePropertyChanged(nameof(IsThemeEditorOpen)));
+
+            // Derived UI-only state: these should reflect the loaded value right
+            // away, so unlike the persistence subscriptions below they are not
+            // Skip(1)'d, and ToProperty raises change notifications for us instead
+            // of relying on a manual RaisePropertyChanged call in an unrelated
+            // subscription.
+            this.WhenAnyValue(vm => vm.NumRenderThreads)
+                .Select(n => n > SafeMaxThreadCount)
+                .ToProperty(this, vm => vm.HighThreads, out highThreads);
+            this.WhenAnyValue(vm => vm.OnnxRunner)
+                .Select(runner => runner == "DirectML" || runner == "CUDA" || runner == "WebGPU")
+                .ToProperty(this, vm => vm.ShowOnnxGpu, out showOnnxGpu);
+            this.WhenAnyValue(vm => vm.ThemeName)
+                .Select(themeName => themeName != "Light" && themeName != "Dark" && !Colors.CustomTheme.IsPackageTheme(themeName))
+                .ToProperty(this, vm => vm.ThemeEditable, out themeEditable);
+
+            PersistOn(this.WhenAnyValue(vm => vm.UseSystemDefaultDevice),
+                useDefault => Preferences.Default.UseSystemDefaultAudioDevice = useDefault);
+            this.WhenAnyValue(vm => vm.AudioOutputDevice)
+                .Skip(1)
+                .OfType<AudioOutputDevice>()
+                .SubscribeOn(AvaloniaScheduler.Instance)
+                .Subscribe(device => {
+                    if (UseSystemDefaultDevice) {
+                        return;
+                    }
+                    if (PlaybackManager.Inst.AudioOutput != null) {
+                        try {
+                            PlaybackManager.Inst.AudioOutput.SelectDevice(device.guid, device.deviceNumber);
+                        } catch (Exception e) {
+                            DocManager.Inst.ExecuteCmd(new ErrorMessageNotification($"Failed to select device {device.name}", e));
+                        }
+                    }
+                });
+            PersistOn(this.WhenAnyValue(vm => vm.AudioBackEnd),
+                index => Preferences.Default.AudioBackEnd = index);
+            PersistOn(this.WhenAnyValue(vm => vm.ReduceAnimations),
+                reduceAnimations => Preferences.Default.ReduceAnimations = reduceAnimations);
+            PersistOn(this.WhenAnyValue(vm => vm.PlaybackAutoScroll),
+                autoScroll => Preferences.Default.PlaybackAutoScroll = autoScroll);
+            PersistOn(this.WhenAnyValue(vm => vm.PlaybackFollowPitch),
+                followPitch => Preferences.Default.PlaybackFollowPitch = followPitch);
+            PersistOn(this.WhenAnyValue(vm => vm.PlaybackSmoothScroll),
+                smoothScroll => Preferences.Default.PlaybackSmoothScroll = smoothScroll);
+            PersistOn(this.WhenAnyValue(vm => vm.PlaybackScrollCursorPosition),
+                cursorPosition => Preferences.Default.PlaybackScrollCursorPosition = cursorPosition);
+            PersistOn(this.WhenAnyValue(vm => vm.RecordingAudioOffsetMs),
+                offset => Preferences.Default.RecordingAudioOffsetMs = offset);
+
+            PersistOn(this.WhenAnyValue(vm => vm.WallpaperOpacity),
+                opacity => {
+                    Preferences.Default.WallpaperOpacity = opacity;
+                    MessageBus.Current.SendMessage(new WallpaperChangedEvent());
+                });
+            PersistOn(this.WhenAnyValue(vm => vm.PlayPosMarkerMargin),
+                playPosMarkerMargin => Preferences.Default.PlayPosMarkerMargin = playPosMarkerMargin);
+            PersistOn(this.WhenAnyValue(vm => vm.MetronomeVolume),
+                metronomeVolume => Preferences.Default.MetronomeVolume = metronomeVolume);
+            PersistOn(this.WhenAnyValue(vm => vm.MetronomeHighFrequency),
+                metronomeHighFrequency => Preferences.Default.MetronomeHighFrequency = metronomeHighFrequency);
+            PersistOn(this.WhenAnyValue(vm => vm.MetronomeLowFrequency),
+                metronomeLowFrequency => Preferences.Default.MetronomeLowFrequency = metronomeLowFrequency);
+            PersistOn(this.WhenAnyValue(vm => vm.LockStartTime),
+                lockStartTime => Preferences.Default.LockStartTime = lockStartTime);
+            PersistOn(this.WhenAnyValue(vm => vm.InstallToAdditionalSingersPath),
+                additionalSingersPath => Preferences.Default.InstallToAdditionalSingersPath = additionalSingersPath);
+            PersistOn(this.WhenAnyValue(vm => vm.Wayland),
+                wayland => Preferences.Default.UseWayland = wayland);
+            PersistOn(this.WhenAnyValue(vm => vm.LoadDeepFolders),
+                loadDeepFolders => Preferences.Default.LoadDeepFolderSinger = loadDeepFolders);
+            PersistOn(this.WhenAnyValue(vm => vm.PreRender),
+                preRender => Preferences.Default.PreRender = preRender);
+            this.WhenAnyValue(vm => vm.Language)
+                .Skip(1)
+                .OfType<CultureInfo>()
+                .Subscribe(lang => {
+                    Preferences.Default.Language = lang?.Name ?? string.Empty;
+                    Preferences.Save();
+                    App.SetLanguage(Preferences.Default.Language);
+                });
+            this.WhenAnyValue(vm => vm.SortingOrder)
+                .Skip(1)
+                .OfType<CultureInfo>()
+                .Subscribe(so => {
+                    Preferences.Default.SortingOrder = so?.Name ?? null;
+                    Preferences.Save();
+                });
+            this.WhenAnyValue(vm => vm.ThemeName)
+                .Skip(1)
+                .Subscribe(themeName => {
+                    if (!IsThemeEditorOpen) {
+                        Preferences.Default.ThemeName = themeName;
+                        Preferences.Save();
+                        App.SetTheme();
+                    }
+                });
+            this.WhenAnyValue(vm => vm.UiFontPath)
+                .Skip(1)
+                .Subscribe(path => {
+                    Preferences.Default.UiFontPath = UiFontManager.IsSupportedFontPath(path) ? path : string.Empty;
+                    Preferences.Save();
+                    UiFontManager.Apply();
+                    RefreshUiFontFamilies();
+                });
+            this.WhenAnyValue(vm => vm.UiFontFamily)
+                .Skip(1)
+                .Subscribe(family => {
+                    Preferences.Default.UiFontFamily = family?.Trim() ?? string.Empty;
+                    Preferences.Save();
+                    UiFontManager.Apply();
+                });
+            this.WhenAnyValue(vm => vm.UseUiFontForNotes)
+                .Skip(1)
+                .Subscribe(useUiFont => {
+                    Preferences.Default.UseUiFontForNotes = useUiFont;
+                    Preferences.Save();
+                    SekaiUtau.App.Controls.TextLayoutCache.Clear();
+                    MessageBus.Current.SendMessage(new NotesRefreshEvent());
+                });
+            this.WhenAnyValue(vm => vm.DegreeStyle)
+                .Skip(1)
+                .Subscribe(degreeStyle => {
+                    Preferences.Default.DegreeStyle = degreeStyle;
+                    Preferences.Save();
+                    MessageBus.Current.SendMessage(new PianorollRefreshEvent("Part"));
+                });
+            this.WhenAnyValue(vm => vm.UseTrackColor)
+                .Skip(1)
+                .Subscribe(trackColor => {
+                    Preferences.Default.UseTrackColor = trackColor;
+                    Preferences.Save();
+                    MessageBus.Current.SendMessage(new PianorollRefreshEvent("TrackColor"));
+                });
+            this.WhenAnyValue(vm => vm.ShowPortrait)
+                .Skip(1)
+                .Subscribe(showPortrait => {
+                    Preferences.Default.ShowPortrait = showPortrait;
+                    Preferences.Save();
+                    MessageBus.Current.SendMessage(new PianorollRefreshEvent("Portrait"));
+                });
+            this.WhenAnyValue(vm => vm.ShowIcon)
+                .Skip(1)
+                .Subscribe(showIcon => {
+                    Preferences.Default.ShowIcon = showIcon;
+                    Preferences.Save();
+                    MessageBus.Current.SendMessage(new PianorollRefreshEvent("Portrait"));
+                });
+            this.WhenAnyValue(vm => vm.ShowGhostNotes)
+                .Skip(1)
+                .Subscribe(showGhostNotes => {
+                    Preferences.Default.ShowGhostNotes = showGhostNotes;
+                    Preferences.Save();
+                    MessageBus.Current.SendMessage(new PianorollRefreshEvent("Part"));
+                });
+            this.WhenAnyValue(vm => vm.NoteHoverGlow)
+                .Skip(1)
+                .Subscribe(noteHoverGlow => {
+                    Preferences.Default.NoteHoverGlow = noteHoverGlow;
+                    Preferences.Save();
+                    MessageBus.Current.SendMessage(new NotesRefreshEvent());
+                });
+            this.WhenAnyValue(vm => vm.ShowPlaybackNoteHighlight)
+                .Skip(1)
+                .Subscribe(showPlaybackNoteHighlight => {
+                    Preferences.Default.ShowPlaybackNoteHighlight = showPlaybackNoteHighlight;
+                    Preferences.Save();
+                    MessageBus.Current.SendMessage(new PianorollRefreshEvent("PlaybackNoteHighlight"));
+                });
+            this.WhenAnyValue(vm => vm.ShowPlaybackNoteBounce)
+                .Skip(1)
+                .Subscribe(showPlaybackNoteBounce => {
+                    Preferences.Default.ShowPlaybackNoteBounce = showPlaybackNoteBounce;
+                    Preferences.Save();
+                    MessageBus.Current.SendMessage(new PianorollRefreshEvent("PlaybackNoteBounce"));
+                });
+            this.WhenAnyValue(vm => vm.DetachPianoRoll)
+                .Skip(1)
+                .Subscribe(detachPianoRoll => {
+                    Preferences.Default.DetachPianoRoll = detachPianoRoll;
+                    Preferences.Save();
+                    MessageBus.Current.SendMessage(new PianorollRefreshEvent("Attachment"));
+                });
+            PersistOn(this.WhenAnyValue(vm => vm.Channel), channel => {
+                Preferences.Default.Channel = channel switch {
+                    1 => "beta",
+                    2 => "alpha",
+                    _ => "stable"
+                };
+            });
+            PersistOn(this.WhenAnyValue(vm => vm.PlaySineWhenNoSinger), playSine => {
+                Preferences.Default.PlaySineWhenNoSinger = playSine;
+                DocManager.Inst.ExecuteCmd(new ValidateProjectNotification());
+                DocManager.Inst.ExecuteCmd(new WaveformReadyNotification());
+                MessageBus.Current.SendMessage(new TracksRefreshEvent());
+            });
+            this.WhenAnyValue(vm => vm.LyricsHelper)
+                .Skip(1)
+                .OfType<LyricsHelperOption>()
+                .Subscribe(option => {
+                    ActiveLyricsHelper.Inst.Set(option?.klass);
+                    Preferences.Default.LyricHelper = option?.klass?.Name ?? string.Empty;
+                    Preferences.Save();
+                });
+            PersistOn(this.WhenAnyValue(vm => vm.LyricsHelperBrackets),
+                brackets => Preferences.Default.LyricsHelperBrackets = brackets);
+            PersistOn(this.WhenAnyValue(vm => vm.RenderStatusInTrackBar),
+                renderStatus => {
+                    Preferences.Default.RenderStatusInTrackBar = renderStatus;
+                    MessageBus.Current.SendMessage(new TracksRefreshEvent());
+                });
+            PersistOn(this.WhenAnyValue(vm => vm.OtoEditor),
+                index => Preferences.Default.OtoEditor = index);
+            PersistOn(this.WhenAnyValue(vm => vm.NumRenderThreads),
+                index => Preferences.Default.NumRenderThreads = index);
+            PersistOn(this.WhenAnyValue(vm => vm.DefaultRenderer),
+                index => Preferences.Default.DefaultRenderer = index);
+            PersistOn(this.WhenAnyValue(vm => vm.OnnxRunner),
+                index => Preferences.Default.OnnxRunner = index);
+            PersistOn(this.WhenAnyValue(vm => vm.OnnxGpu),
+                gpu => Preferences.Default.OnnxGpu = gpu.deviceId);
+            this.WhenAnyValue(vm => vm.MergePhrasesSecIndex)
+                .Skip(1)
+                .Subscribe(index => {
+                    if (index < 0 || index >= MergePhrasesSecs.Count) {
+                        return;
+                    }
+                    string item = MergePhrasesSecs[index];
+                    Preferences.Default.MergePhrasesSec = item == "Auto" ? 0 : float.Parse(item);
+                    Preferences.Save();
+                    DocManager.Inst.ExecuteCmd(new ValidateProjectNotification());
+                    DocManager.Inst.ExecuteCmd(new PreRenderNotification());
+                });
+            PersistOn(this.WhenAnyValue(vm => vm.GameBackend),
+                backend => Preferences.Default.GameBackend = backend == "GGML" ? "ggml" : "onnx");
+            PersistOn(this.WhenAnyValue(vm => vm.RememberMid),
+                value => Preferences.Default.RememberMid = value);
+            PersistOn(this.WhenAnyValue(vm => vm.RememberUst),
+                value => Preferences.Default.RememberUst = value);
+            PersistOn(this.WhenAnyValue(vm => vm.RememberVsqx),
+                value => Preferences.Default.RememberVsqx = value);
+            PersistOn(this.WhenAnyValue(vm => vm.DefaultSnapCurve),
+                value => Preferences.Default.DefaultSnapCurve = value);
+            PersistOn(this.WhenAnyValue(vm => vm.ClearCacheOnQuit),
+                value => Preferences.Default.ClearCacheOnQuit = value);
+            PersistOn(this.WhenAnyValue(vm => vm.DiffSingerSteps),
+                value => Preferences.Default.DiffSingerSteps = value);
+            PersistOn(this.WhenAnyValue(vm => vm.DiffSingerStepsVariance),
+                value => Preferences.Default.DiffSingerStepsVariance = value);
+            PersistOn(this.WhenAnyValue(vm => vm.DiffSingerStepsPitch),
+                value => Preferences.Default.DiffSingerStepsPitch = value);
+            PersistOn(this.WhenAnyValue(vm => vm.DiffSingerDepth),
+                value => Preferences.Default.DiffSingerDepth = value / 100);
+            PersistOn(this.WhenAnyValue(vm => vm.DiffSingerTensorCache),
+                value => Preferences.Default.DiffSingerTensorCache = value);
+            PersistOn(this.WhenAnyValue(vm => vm.DiffSingerVarianceLocalPitchPatch),
+                value => Preferences.Default.DiffSingerVarianceLocalPitchPatch = value);
+            PersistOn(this.WhenAnyValue(vm => vm.DiffSingerLangCodeHide),
+                value => Preferences.Default.DiffSingerLangCodeHide = value);
+            PersistOn(this.WhenAnyValue(vm => vm.SkipRenderingMutedTracks),
+                skipRenderingMutedTracks => Preferences.Default.SkipRenderingMutedTracks = skipRenderingMutedTracks);
+        }
+
+        public void TestAudioOutputDevice() {
+            try {
+                PlaybackManager.Inst.PlayTestSound();
+            } catch (Exception e) {
+                Log.Error(e, "Failed to play test sound.");
+                DocManager.Inst.ExecuteCmd(new ErrorMessageNotification("Failed to play test sound.", e));
+            }
+        }
+        public void TestMetronome() {
+            try {
+                PlaybackManager.Inst.PlayMetronomeClick();
+            } catch (Exception e) {
+                Log.Error(e, "Failed to play metronome preview.");
+                DocManager.Inst.ExecuteCmd(new ErrorMessageNotification("Failed to play metronome preview.", e));
+            }
+        }
+
+        public void ResetMetronomeVolume() {
+            MetronomeVolume = new Preferences.SerializablePreferences().MetronomeVolume;
+        }
+
+        public void ResetMetronomeHighFrequency() {
+            MetronomeHighFrequency = new Preferences.SerializablePreferences().MetronomeHighFrequency;
+        }
+
+        public void ResetMetronomeLowFrequency() {
+            MetronomeLowFrequency = new Preferences.SerializablePreferences().MetronomeLowFrequency;
+        }
+
+        public void OpenResamplerLocation() {
+            try {
+                string path = PathManager.Inst.ResamplersPath;
+                Directory.CreateDirectory(path);
+                OS.OpenFolder(path);
+            } catch (Exception e) {
+                DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(e));
+            }
+        }
+
+        public void SetAddlSingersPath(string path) {
+            Preferences.Default.AdditionalSingerPath = path;
+            Preferences.Save();
+            this.RaisePropertyChanged(nameof(AdditionalSingersPath));
+        }
+
+        public void SetVLabelerPath(string path) {
+            Preferences.Default.VLabelerPath = path;
+            Preferences.Save();
+            this.RaisePropertyChanged(nameof(VLabelerPath));
+        }
+
+        public void SetSetParamPath(string path) {
+            Preferences.Default.SetParamPath = path;
+            Preferences.Save();
+            this.RaisePropertyChanged(nameof(SetParamPath));
+        }
+        
+        public void SetUiFontPath(string path) {
+            UiFontPath = path;
+            UiFontFamily = UiFontManager.GetSuggestedFamilyName(path);
+        }
+
+        public void ResetUiFont() {
+            UiFontPath = string.Empty;
+            UiFontFamily = string.Empty;
+        }
+
+        private void RefreshUiFontFamilies() {
+            UiFontFamilies = UiFontManager.GetAvailableFontFamilies();
+            if (!string.IsNullOrWhiteSpace(UiFontFamily)
+                && !UiFontFamilies.Contains(UiFontFamily, StringComparer.OrdinalIgnoreCase)) {
+                UiFontFamilies.Insert(0, UiFontFamily);
+            }
+            this.RaisePropertyChanged(nameof(UiFontFamilies));
+        }
+
+        public void SetWinePath(string path) {
+            Preferences.Default.WinePath = path;
+            Preferences.Save();
+            ToolsManager.Inst.Initialize();
+            this.RaisePropertyChanged(nameof(WinePath));
+        }
+
+        public void RefreshThemes() {
+            Colors.CustomTheme.ListThemes();
+            _ = OudepLoaderRegistry.LoadAllAsync();
+            this.RaisePropertyChanged(nameof(ThemeItems));
+        }
+    }
+}

@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="LICENSE.txt" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="SekaiUtau.Core/SekaiUtau.Core.csproj" />
+  <Project Path="SekaiUtau.Plugin.Builtin/SekaiUtau.Plugin.Builtin.csproj" />
+  <Project Path="SekaiUtau.Test/SekaiUtau.Test.csproj">
+    <BuildDependency Project="SekaiUtau/SekaiUtau.csproj" />
+  </Project>
+  <Project Path="SekaiUtau.UiTest/SekaiUtau.UiTest.csproj" />
+  <Project Path="SekaiUtau/SekaiUtau.csproj">
+    <BuildDependency Project="SekaiUtau.Plugin.Builtin/SekaiUtau.Plugin.Builtin.csproj" />
+  </Project>
+</Solution>
