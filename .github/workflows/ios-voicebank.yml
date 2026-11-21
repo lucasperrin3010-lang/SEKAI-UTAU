@@ -23,9 +23,12 @@ jobs:
           # sans cette mise a jour, la compilation s'arrete sur une exigence de version.
           dotnet workload update
           dotnet workload list
-      - name: Versions Xcode disponibles
+      - name: Xcode attendu par le pack iOS
         run: |
-          ls -d /Applications/Xcode*.app 2>/dev/null || true
+          # Le pack iOS du SDK 10 exige Xcode 26.0 ; l'image en a plusieurs.
+          if [ -d /Applications/Xcode_26.0.app ]; then
+            sudo xcode-select -s /Applications/Xcode_26.0.app
+          fi
           xcodebuild -version
       - name: Compilation (appareil, sans signature)
         run: |
