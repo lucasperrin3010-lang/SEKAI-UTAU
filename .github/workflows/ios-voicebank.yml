@@ -1,14 +1,13 @@
 name: Voicebank iOS
 
-# Compile l'edition iOS de l'app voicebank sur un runner macOS et produit un IPA
-# NON SIGNE (Payload/*.app zippe). Windows ne peut pas compiler iOS : Apple exige
-# macOS et Xcode. L'IPA non signee s'installe ensuite sur un iPhone depuis
-# Windows avec Sideloadly (compte Apple gratuit : 7 jours, a resigner ensuite).
+# Compile l'édition iOS de l'app voicebank sur un runner macOS, pour vérifier
+# qu'elle compile sans avoir de Mac. Ne produit pas d'IPA signée : la signature
+# demande un certificat Apple (voir bin/build-voicebank-ipa.sh).
 on:
   workflow_dispatch:
 
 jobs:
-  ipa:
+  compile:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,41 +16,8 @@ jobs:
           dotnet-version: |
             10.0.x
       - name: Charge de travail iOS
+        run: dotnet workload install ios
+      - name: Compilation (simulateur, sans signature)
         run: |
-          # Ne pas lancer « dotnet workload update » : il installe un pack iOS
-          # (27.x) qui exige un Xcode plus recent que celui de l'image.
-          dotnet workload install ios
-          dotnet workload list
-      - name: Xcode attendu par le pack iOS
-        run: |
-          # Le pack iOS du SDK 10 exige Xcode 26.0, et certaines installations de
-          # l'image n'ont pas le SDK macOS : on prend la premiere qui l'a.
-          for c in /Applications/Xcode_26.0.1.app /Applications/Xcode_26.0.app; do
-            if [ -d "$c/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk" ]; then
-              echo "Xcode retenu : $c"
-              sudo xcode-select -s "$c"
-              break
-            fi
-          done
-          xcodebuild -version
-          xcrun --find clang
-      - name: Compilation (appareil, sans signature)
-        run: |
-          dotnet publish SekaiUtau.Voicebank.iOS/SekaiUtau.Voicebank.iOS.csproj \
-            -c Release -f net10.0-ios -p:RuntimeIdentifier=ios-arm64 \
-            -p:EnableCodeSigning=false -p:UseInterpreter=true -o out
-      - name: Paquet IPA
-        run: |
-          set -euo pipefail
-          ls -la out
-          APP=$(find out -maxdepth 1 -name '*.app' | head -1)
-          echo "app: $APP"
-          mkdir -p Payload
-          cp -R "$APP" Payload/
-          zip -qry SEKAI-UTAU-Voicebank-non-signee.ipa Payload
-          ls -lh SEKAI-UTAU-Voicebank-non-signee.ipa
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ipa-non-signee
-          path: SEKAI-UTAU-Voicebank-non-signee.ipa
-          if-no-files-found: error
+          dotnet build SekaiUtau.Voicebank.iOS/SekaiUtau.Voicebank.iOS.csproj \
+            -c Release -f net10.0-ios -p:RuntimeIdentifier=iossimulator-arm64
